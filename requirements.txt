@@ -1,1 +1,12 @@
 
+codecov
+coverage
+cython
+cvxpy
+cvxopt
+matplotlib
+nose
+numpy
+quadprog
+scipy
+pandas
