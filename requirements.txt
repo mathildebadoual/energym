@@ -1,12 +1,8 @@
 codecov
 coverage
 cython
-cvxpy
-cvxopt
 gym
 matplotlib
 nose
 numpy
-quadprog
 scipy
-pandas
