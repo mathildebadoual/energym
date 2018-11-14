@@ -1,6 +1,6 @@
 from gym.envs.registration import register
 
 register(
-        id='smartgrid-v0',
-        entry_point='energym.envs:SmartgridEnv',
+        id='energy_market-v0',
+        entry_point='energym.envs:EnergyMarketEnv',
         )

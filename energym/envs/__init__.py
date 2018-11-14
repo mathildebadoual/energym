@@ -1,1 +1,1 @@
-from energym.envs.smartgrid_env import SmartgridEnv
+from energym.envs.energy_market_env import EnergyMarketEnv
