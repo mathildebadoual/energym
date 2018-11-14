@@ -1,4 +1,5 @@
 import gym
+import numpy as np
 from gym import error, spaces, utils
 from gym.utils import seeding
 
@@ -10,21 +11,46 @@ class BatteryEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
+        # limitation parameters
+        self._max_soe = 120  # soe = state of energy in MW
+        self._min_soe = 0
+        self._max_power = 10  # power to charge or discharge in MWh
+        self._min_power = -10
+        self._efficiency_ratio = 0.99
+
+        # The state is the soc
+        self._state = 0
+
         self.reset()
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,))
-        self.action_space = spaces.Box(low=-0.1, high=0.1, shape=(2,))
+        self.observation_space = spaces.Box(low=self._min_soe, high=self._max_soe, shape=(1,))
+        self.action_space = spaces.Box(low=self._min_power, high=self._min_power, shape=(1,))
 
     def step(self, action):
+        penalty = 1000
+        energy_to_add = self._efficiency_ratio * action
+        if self._min_power <= abs(energy_to_add) <= self._max_power:
+            next_soe = self._state + energy_to_add
+            if self._min_soe <= next_soe <= self._max_soe:
+                self._state = next_soe
+                penalty = 0
+
+        reward = penalty
+        ob = self._get_obs()
+
+        # TODO(Mathilde): define when it is done for this env
+        done = 0
         return ob, reward, done, dict()
 
     def reset(self):
-        self._state = np.array([0, 0], dtype=np.float32)
+        # TODO(Mathilde): look at the gym.spaces.Box doc to see if we can randomly select a element in the "box"
+        self._state = np.random.uniform() * abs(self._max_soe - self._min_soe)
         return self._get_obs()
 
     def render(self):
         print('current state:', self._state)
 
     def _get_obs(self):
+        # to assure we are not overwriting on the state
         return np.copy(self._state)
 
     def seed(self, seed):
