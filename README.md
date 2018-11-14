@@ -23,5 +23,5 @@ env = gym.make('battery-v0')
 
 # Existing Environments
 
-battery-v0: Environment of a simple battery 
-energy_market-v0: Environment of a simple energy market with external data taken from CAISO.
+- battery-v0: Environment of a simple battery 
+- energy_market-v0: Environment of a simple energy market with external data taken from CAISO.
