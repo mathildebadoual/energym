@@ -6,3 +6,4 @@ matplotlib
 nose
 numpy
 scipy
+cvxpy

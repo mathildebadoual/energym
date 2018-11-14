@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class EnergyMarketEnv(gym.Env):
+class BatteryEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self):
