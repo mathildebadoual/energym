@@ -7,3 +7,7 @@ nose
 numpy
 scipy
 cvxpy
+pandas
+datetime
+pytz
+ipdb
