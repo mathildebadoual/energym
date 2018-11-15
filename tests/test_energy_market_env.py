@@ -3,12 +3,10 @@ import unittest
 import gym
 import energym
 
-# This is a code inspired by OpenAI.gym tests code
 
-
-class TestBatteryEnv(unittest.TestCase):
+class TestEnergyMarketEnv(unittest.TestCase):
     def setUp(self):
-        self.env = gym.make('battery-v0')
+        self.env = gym.make('energy_market-v0')
 
     def test_as_gym_env(self):
         ob_space = self.env.observation_space
@@ -35,16 +33,4 @@ class TestBatteryEnv(unittest.TestCase):
                 break
 
     def test_step(self):
-        action = 0
-        ob = self.env.reset()
-        ob_next, reward, done, _ = self.env.step(action)
-        self.assertEqual(ob, ob_next)
-
-        action = np.array([2])
-        ob = self.env.reset()
-        ob_next, reward, done, _ = self.env.step(action)
-        self.assertEqual(ob + self.env._efficiency_ratio * action, ob_next)
-
-        action = 100
-        _ = self.env.reset()
-        self.assertRaises(ValueError, lambda: self.env.step(action))
+        pass

@@ -4,7 +4,7 @@ cython
 gym
 matplotlib
 nose
-numpy
+numpy==1.15.0
 scipy
 cvxpy
 pandas

@@ -21,8 +21,8 @@ class EnergyMarketEnv(gym.Env):
         self._date = start_date
         self._delta_time = delta_time
         self._opt_problem = self.build_opt_problem()
-        self._gen_df = pd.read_pickle("gen_caiso.pkl")
-        self._dem_df = pd.read_pickle("dem_caiso.pkl")
+        self._gen_df = pd.read_pickle("data/gen_caiso.pkl")
+        self._dem_df = pd.read_pickle("data/dem_caiso.pkl")
         self._timezone = pytz.timezone("America/Los_Angeles")
         self._print_optimality = False
 
@@ -73,7 +73,7 @@ class EnergyMarketEnv(gym.Env):
         self._opt_problem.solve(verbose=False)
         if self._print_optimality or "optimal" not in self._opt_problem.status:
             print(self._opt_problem.status)
-            raise (OptimizationException)
+            raise OptimizationException
         self._date += self._delta_time
 
         # send result to battery
