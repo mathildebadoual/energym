@@ -12,11 +12,13 @@ class BatteryEnv(gym.Env):
 
     def __init__(self):
         # limitation parameters
-        self._max_soe = 120  # soe = state of energy in MW
+        self._max_soe = 10000  # soe = state of energy in MW
         self._min_soe = 0
-        self._max_power = 10  # power to charge or discharge in MWh
-        self._min_power = -10
+        self._max_power = 1000  # power to charge or discharge
+        self._min_power = -1000
         self._efficiency_ratio = 0.99
+
+        # gym variables
         self.observation_space = spaces.Box(low=self._min_soe, high=self._max_soe, shape=(1,))
         self.action_space = spaces.Box(low=self._min_power, high=self._max_power, shape=(1,))
 

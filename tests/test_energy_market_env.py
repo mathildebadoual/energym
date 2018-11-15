@@ -14,23 +14,11 @@ class TestEnergyMarketEnv(unittest.TestCase):
         ob = self.env.reset()
         self.assertTrue(ob_space.contains(ob))
 
-        a = act_space.sample()
+        a = np.array([1000, 2])
         observation, reward, done, _info = self.env.step(a)
         self.assertTrue(ob_space.contains(observation))
         self.assertTrue(np.isscalar(reward))
         self.assertTrue(isinstance(done, bool))
-
-        # Run a longer rollout
-        agent = lambda ob: self.env.action_space.sample()
-        ob = self.env.reset()
-        for _ in range(10):
-            self.assertTrue(self.env.observation_space.contains(ob))
-            a = agent(ob)
-            self.assertTrue(self.env.action_space.contains(a))
-            (ob, _reward, done, _info) = self.env.step(a)
-            print(ob)
-            if done:
-                break
 
     def test_step(self):
         pass
