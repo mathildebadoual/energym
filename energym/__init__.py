@@ -9,3 +9,8 @@ register(
         id='battery-v0',
         entry_point='energym.envs:BatteryEnv',
 )
+
+register(
+        id='energy_market_battery-v0',
+        entry_point='energym.envs:EnergyMarketBatteryEnv',
+)

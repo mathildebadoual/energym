@@ -19,8 +19,8 @@ class BatteryEnv(gym.Env):
         self._efficiency_ratio = 0.99
 
         # gym variables
-        self.observation_space = spaces.Box(low=self._min_soe, high=self._max_soe, shape=(1,))
-        self.action_space = spaces.Box(low=self._min_power, high=self._max_power, shape=(1,))
+        self.observation_space = spaces.Box(low=self._min_soe, high=self._max_soe, shape=(1,), dtype=np.float32)
+        self.action_space = spaces.Box(low=self._min_power, high=self._max_power, shape=(1,), dtype=np.float32)
 
         # The state is the soc
         self._state = np.array([0])
@@ -31,14 +31,11 @@ class BatteryEnv(gym.Env):
         if not isinstance(action, np.ndarray):
             action = np.array([action])
 
-        if not self.action_space.contains(action):
-            raise ValueError('The action is not in the action space')
-
-        penalty = 1000
+        penalty = - 10000000
         energy_to_add = self._efficiency_ratio * action
-        if self._min_power <= abs(energy_to_add) <= self._max_power:
+        if self.action_space.contains(abs(energy_to_add)):
             next_soe = self._state + energy_to_add
-            if self._min_soe <= next_soe <= self._max_soe:
+            if self.observation_space.contains(next_soe):
                 self._state = next_soe
                 penalty = 0
 

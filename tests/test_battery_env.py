@@ -46,5 +46,6 @@ class TestBatteryEnv(unittest.TestCase):
         self.assertEqual(ob + self.env._efficiency_ratio * action, ob_next)
 
         action = 10000
-        _ = self.env.reset()
-        self.assertRaises(ValueError, lambda: self.env.step(action))
+        self.env.reset()
+        ob_next, reward, done, _ = self.env.step(action)
+        self.assertEqual(reward, -10000000)

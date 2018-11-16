@@ -1,5 +1,5 @@
 import gym
-from gym import error, spaces, utils
+from gym import spaces
 from gym.utils import seeding
 
 import pandas as pd
@@ -27,8 +27,8 @@ class EnergyMarketEnv(gym.Env):
         self._print_optimality = False
 
         # gym variables
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,))
-        self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,))
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 
         # the state is the clearance (bool) and the quantity cleared
         self._state = np.array([0, 0], dtype=np.float32)
@@ -86,7 +86,7 @@ class EnergyMarketEnv(gym.Env):
             ipdb.set_trace()
 
         # the state here is the price and capacity cleared
-        self._state = np.array([self._p.value[-1], self._cleared.value[-1]])
+        self._state = np.array([self._p.value[-1], round(self._cleared.value[-1], 0)])
         ob = self._get_obs()
 
         # TODO(Mathilde): For this first version the environment has no cost (could be in the future to use the grid's constraints
@@ -97,7 +97,7 @@ class EnergyMarketEnv(gym.Env):
 
         return ob, reward, done, dict()
 
-    def reset(self):
+    def reset(self, start_date=None):
         self._state = np.array([0, 0], dtype=np.float32)
         return self._get_obs()
 
@@ -126,7 +126,6 @@ class EnergyMarketEnv(gym.Env):
         gen_wind_list = gen[gen['fuel_name'] == 'wind']['gen_MW'].values
         gen_solar_list = gen[gen['fuel_name'] == 'solar']['gen_MW'].values
         gen_other_list = gen[gen['fuel_name'] == 'other']['gen_MW'].values
-        print(gen_other_list)
         p_max = np.array([np.mean(gen_wind_list),
                           np.mean(gen_solar_list),
                           np.mean(gen_other_list),
@@ -149,7 +148,6 @@ class EnergyMarketEnv(gym.Env):
         end_date_aware = self._timezone.localize(end_at)
         return self._dem_df[(start_date_aware <= self._dem_df["timestamp"]) &
                            (end_date_aware > self._dem_df["timestamp"])]
-
 
 class EmptyDataException(Exception):
     def __init__(self):
