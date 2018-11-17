@@ -7,31 +7,38 @@ from gym.utils import seeding
 import logging
 logger = logging.getLogger(__name__)
 
-# TODO(Mathilde): Explain well what is that environment
+# TODO(Mathilde): Explain well what is this environment...
 
 
 class EnergyMarketBatteryEnv(gym.Env):
     def __init__(self, start_date=datetime.datetime(2017, 7, 3), delta_time=datetime.timedelta(hours=1)):
+        # TODO(Mathilde): If different modes, should take only continous envs
         self._energy_market = gym.make('energy_market-v0')
         self._battery = gym.make('battery-v0')
         self._start_date = start_date
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
         self._delta_time = delta_time
+        self._n_discrete_cost = 50
+        self._n_discrete_power = 50
+        self._n_discrete_actions = self._n_discrete_power * self._n_discrete_cost
+        self._min_cost, self._max_cost = 0, 20
+        self._min_power, self._max_power = self._battery.action_space.low[0], self._battery.action_space.high[0]
+        print(self._min_power)
 
         # gym variables
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf,
                                             shape=(self._battery.observation_space.shape[0] +
                                                    self._energy_market.observation_space.shape[0],),
                                             dtype=np.float32)
-        self.action_space = self._battery.action_space
+        self.action_space = spaces.Discrete(self._n_discrete_actions)
 
     def step(self, action):
-        quantity, price = action[0], action[1]
+        power, cost = self._discrete_to_continuous_action(action)
         done = False
         reward = 0
 
         try:
-            ob_market, _, _, _ = self._energy_market.step(action)
+            ob_market, _, _, _ = self._energy_market.step(np.array([power, cost]))
         except OptimizationException:
             self._state = np.array([0, 0, 0], dtype=np.float32)
             ob = self._get_obs()
@@ -44,13 +51,13 @@ class EnergyMarketBatteryEnv(gym.Env):
             done = True
             return ob, reward, done, dict()
 
-        quantity_cleared, cleared_bool = ob_market[0], ob_market[1]
+        power_cleared, cleared_bool = ob_market[0], ob_market[1]
 
-        ob_battery, reward_battery, _, _ = self._battery.step(quantity_cleared * cleared_bool)
+        ob_battery, reward_battery, _, _ = self._battery.step(power_cleared * cleared_bool)
 
         # define state and reward
         self._state = np.concatenate((ob_battery, ob_market))
-        reward = quantity_cleared * price * cleared_bool + reward_battery
+        reward = power_cleared * cost * cleared_bool + reward_battery
         ob = self._get_obs()
 
         return ob, reward, done, dict()
@@ -73,6 +80,26 @@ class EnergyMarketBatteryEnv(gym.Env):
             np.random.seed = seed
         else:
             np.random.seed = seeding.np_random()
+
+    @property
+    def _power_precision(self):
+        return (self._max_power - self._min_power) / self._n_discrete_power
+
+    @property
+    def _cost_precision(self):
+        return (self._max_cost - self._min_cost) / self._n_discrete_cost
+
+    def _discrete_to_continuous_action(self, discrete_action):
+        """
+        maps the integer discrete_action to the grid (power, cost)
+        :param discrete_action: int
+        :return: (float, float)
+        """
+        power = self._min_power + (discrete_action % self._n_discrete_power) * self._power_precision
+        cost = self._min_cost + (discrete_action // self._n_discrete_power) * self._cost_precision
+
+        return power, cost
+
 
 class EmptyDataException(Exception):
     def __init__(self):

@@ -16,18 +16,19 @@ logger = logging.getLogger(__name__)
 class EnergyMarketEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, start_date=datetime.datetime(2017, 7, 3), delta_time=datetime.timedelta(hours=1)):
+    def __init__(self, data_path='data', start_date=datetime.datetime(2017, 7, 3), delta_time=datetime.timedelta(hours=1)):
         self._num_agents = 5
         self._date = start_date
         self._delta_time = delta_time
         self._opt_problem = self.build_opt_problem()
-        self._gen_df = pd.read_pickle("energym/envs/data/gen_caiso.pkl")
-        self._dem_df = pd.read_pickle("energym/envs/data/dem_caiso.pkl")
+        self._gen_df = pd.read_pickle(data_path + "/gen_caiso.pkl")
+        self._dem_df = pd.read_pickle(data_path + "/dem_caiso.pkl")
         self._timezone = pytz.timezone("America/Los_Angeles")
         self._print_optimality = False
 
         # gym variables
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
+        # TODO(Mathilde): Add an option for a discrete action space
         self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 
         # the state is the clearance (bool) and the quantity cleared
@@ -148,6 +149,8 @@ class EnergyMarketEnv(gym.Env):
         end_date_aware = self._timezone.localize(end_at)
         return self._dem_df[(start_date_aware <= self._dem_df["timestamp"]) &
                            (end_date_aware > self._dem_df["timestamp"])]
+
+
 
 class EmptyDataException(Exception):
     def __init__(self):

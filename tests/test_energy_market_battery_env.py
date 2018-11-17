@@ -13,7 +13,7 @@ class TestEnergyMarketEnv(unittest.TestCase):
         ob = self.env.reset()
         self.assertTrue(ob_space.contains(ob))
 
-        a = np.array([500, 2])
+        a = self.env.action_space.sample()
         observation, reward, done, _info = self.env.step(a)
         self.assertTrue(ob_space.contains(observation))
         self.assertTrue(np.isscalar(reward))
@@ -21,7 +21,13 @@ class TestEnergyMarketEnv(unittest.TestCase):
 
     def test_step(self):
         self.env.reset()
-        action = np.array([500, 10])
         for i in range(100):
+            action = self.env.action_space.sample()
             ob_next, reward, done, _ = self.env.step(action)
         self.assertTrue(reward <= 0)
+
+    def test_discrete_to_continuous_action(self):
+        action = self.env.action_space.sample()
+        quantity, cost = self.env._discrete_to_continuous_action(action)
+        self.assertIsInstance(quantity, float)
+        self.assertIsInstance(cost, float)

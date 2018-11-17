@@ -20,6 +20,7 @@ class BatteryEnv(gym.Env):
 
         # gym variables
         self.observation_space = spaces.Box(low=self._min_soe, high=self._max_soe, shape=(1,), dtype=np.float32)
+        # TODO(Mathilde): Add option for a discrete action space (for now it is continuous)
         self.action_space = spaces.Box(low=self._min_power, high=self._max_power, shape=(1,), dtype=np.float32)
 
         # The state is the soc
