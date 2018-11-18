@@ -1,6 +1,7 @@
 import gym
 from gym import spaces
 from gym.utils import seeding
+from energym.envs.utils import OptimizationException, EmptyDataException
 
 import pandas as pd
 import cvxpy as cvx
@@ -77,6 +78,10 @@ class EnergyMarketEnv(gym.Env):
         self._opt_problem.solve(verbose=False)
         if self._print_optimality or "optimal" not in self._opt_problem.status:
             print(self._opt_problem.status)
+            print(action)
+            print(self._date)
+            print(self._p_min.value, self._p_max.value, self._cost.value)
+            print(self._demand.value)
             raise OptimizationException
         self._date += self._delta_time
 
@@ -99,6 +104,8 @@ class EnergyMarketEnv(gym.Env):
         return ob, reward, done, dict()
 
     def reset(self, start_date=None):
+        if start_date is not None:
+            self._date = start_date
         self._state = np.array([0, 0], dtype=np.float32)
         return self._get_obs()
 
@@ -130,11 +137,12 @@ class EnergyMarketEnv(gym.Env):
         p_max = np.array([np.mean(gen_wind_list),
                           np.mean(gen_solar_list),
                           np.mean(gen_other_list),
-                          10000 + 10000 * (np.mean(gen_wind_list) + np.mean(gen_solar_list) + np.mean(gen_other_list)),
+                          100000 + 10000 * (np.mean(gen_wind_list) + np.mean(gen_solar_list) + np.mean(gen_other_list)),
                           action[0]])
         p_min = p_max.copy()
         p_min[2] = 0
         p_min[3] = 0
+        p_min[-1] = 0
         cost = np.array([2, 2, 9, 1000, action[1]])
         return p_min, p_max, cost
 
@@ -149,14 +157,3 @@ class EnergyMarketEnv(gym.Env):
         end_date_aware = self._timezone.localize(end_at)
         return self._dem_df[(start_date_aware <= self._dem_df["timestamp"]) &
                            (end_date_aware > self._dem_df["timestamp"])]
-
-
-
-class EmptyDataException(Exception):
-    def __init__(self):
-        super().__init__()
-
-
-class OptimizationException(Exception):
-    def __init__(self):
-        super().__init__()

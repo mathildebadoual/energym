@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 from gym import error, spaces, utils
 from gym.utils import seeding
+from energym.envs.utils import OptimizationException, EmptyDataException
 
 import logging
 logger = logging.getLogger(__name__)
@@ -23,7 +24,6 @@ class EnergyMarketBatteryEnv(gym.Env):
         self._n_discrete_actions = self._n_discrete_power * self._n_discrete_cost
         self._min_cost, self._max_cost = 0, 20
         self._min_power, self._max_power = self._battery.action_space.low[0], self._battery.action_space.high[0]
-        print(self._min_power)
 
         # gym variables
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf,
@@ -62,7 +62,9 @@ class EnergyMarketBatteryEnv(gym.Env):
 
         return ob, reward, done, dict()
 
-    def reset(self):
+    def reset(self, start_date=None):
+        if start_date is not None:
+            self._start_date = start_date
         ob_market = self._energy_market.reset(self._start_date)
         ob_battery = self._battery.reset()
         self._state = np.concatenate((ob_market, ob_battery))
@@ -99,13 +101,3 @@ class EnergyMarketBatteryEnv(gym.Env):
         cost = self._min_cost + (discrete_action // self._n_discrete_power) * self._cost_precision
 
         return power, cost
-
-
-class EmptyDataException(Exception):
-    def __init__(self):
-        super().__init__()
-
-
-class OptimizationException(Exception):
-    def __init__(self):
-        super().__init__()
