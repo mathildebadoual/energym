@@ -10,6 +10,7 @@ import pytz
 import datetime
 import logging
 import ipdb
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +18,11 @@ logger = logging.getLogger(__name__)
 class EnergyMarketEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, data_path='data', start_date=datetime.datetime(2017, 7, 3), delta_time=datetime.timedelta(hours=1)):
+    def __init__(self, start_date=datetime.datetime(2017, 7, 3), delta_time=datetime.timedelta(hours=1)):
         self._num_agents = 5
         self._date = start_date
         self._delta_time = delta_time
+        data_path = os.path.join(os.path.dirname(__file__), 'data')
         self._opt_problem = self.build_opt_problem()
         self._gen_df = pd.read_pickle(data_path + "/gen_caiso.pkl")
         self._dem_df = pd.read_pickle(data_path + "/dem_caiso.pkl")
@@ -28,12 +30,12 @@ class EnergyMarketEnv(gym.Env):
         self._print_optimality = False
 
         # gym variables
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)
         # TODO(Mathilde): Add an option for a discrete action space
         self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 
         # the state is the clearance (bool) and the quantity cleared
-        self._state = np.array([0, 0], dtype=np.float32)
+        self._state = np.array([0], dtype=np.float32)
 
         self.reset()
 
@@ -46,13 +48,12 @@ class EnergyMarketEnv(gym.Env):
 
         # build variables
         self._p = cvx.Variable(self._num_agents)
-        self._cleared = cvx.Variable(self._num_agents, boolean=True)
 
         # build constraints
         constraint = [np.ones(self._num_agents).T * self._p == self._demand]
         for i in range(self._num_agents):
-            constraint += [self._p[i] <= self._cleared[i] * self._p_max[i]]
-            constraint += [self._cleared[i] * self._p_min[i] <= self._p[i]]
+            constraint += [self._p[i] <= self._p_max[i]]
+            constraint += [self._p_min[i] <= self._p[i]]
 
         # build the objective
         objective = cvx.Minimize(self._p.T * self._cost)
@@ -77,28 +78,23 @@ class EnergyMarketEnv(gym.Env):
         # solve the problem
         self._opt_problem.solve(verbose=False)
         if self._print_optimality or "optimal" not in self._opt_problem.status:
-            print(self._opt_problem.status)
-            print(action)
-            print(self._date)
-            print(self._p_min.value, self._p_max.value, self._cost.value)
-            print(self._demand.value)
             raise OptimizationException
         self._date += self._delta_time
 
-        # send result to battery
+        # TODO(Mathilde): Why do we need that?
         try:
-            self._p.value[-1], self._cleared.value[-1]
+            self._p.value[-1]
         except TypeError:
             ipdb.set_trace()
 
         # the state here is the price and capacity cleared
-        self._state = np.array([self._p.value[-1], round(self._cleared.value[-1], 0)])
+        self._state = np.array([self._p.value[-1]])
         ob = self._get_obs()
 
         # TODO(Mathilde): For this first version the environment has no cost (could be in the future to use the grid's constraints
         reward = 0
 
-        # TODO(Mathilde): We could put done = False when we reach the end of the data
+        # TODO(Mathilde): We could put done = True when we reach the end of the data
         done = False
 
         return ob, reward, done, dict()
@@ -106,7 +102,7 @@ class EnergyMarketEnv(gym.Env):
     def reset(self, start_date=None):
         if start_date is not None:
             self._date = start_date
-        self._state = np.array([0, 0], dtype=np.float32)
+        self._state = np.array([0], dtype=np.float32)
         return self._get_obs()
 
     def render(self, mode='rgb_array'):
@@ -138,11 +134,9 @@ class EnergyMarketEnv(gym.Env):
                           np.mean(gen_solar_list),
                           np.mean(gen_other_list),
                           100000 + 10000 * (np.mean(gen_wind_list) + np.mean(gen_solar_list) + np.mean(gen_other_list)),
-                          action[0]])
-        p_min = p_max.copy()
-        p_min[2] = 0
-        p_min[3] = 0
-        p_min[-1] = 0
+                          max(action[0], 0)])
+        p_min = np.zeros(5)
+        p_min[-1] = min(action[0], 0)
         cost = np.array([2, 2, 9, 1000, action[1]])
         return p_min, p_max, cost
 

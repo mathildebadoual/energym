@@ -23,9 +23,9 @@ class TestEnergyMarketEnv(unittest.TestCase):
         self.assertTrue(isinstance(done, bool))
 
     def test_step(self):
-        start_date = datetime.datetime(2017, 10, 15, 19, 00, 00)
+        start_date = datetime.datetime(2017, 8, 2, 5, 00, 00)
         self.env.reset(start_date=start_date)
-        action = np.array([960, 14.8])
+        action = np.array([-800, 4.8])
         with self.assertNotRaises(OptimizationException):
             self.env.step(action)
 

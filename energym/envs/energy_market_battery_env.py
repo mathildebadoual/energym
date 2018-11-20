@@ -51,13 +51,13 @@ class EnergyMarketBatteryEnv(gym.Env):
             done = True
             return ob, reward, done, dict()
 
-        power_cleared, cleared_bool = ob_market[0], ob_market[1]
+        power_cleared = ob_market[0]
 
-        ob_battery, reward_battery, _, _ = self._battery.step(power_cleared * cleared_bool)
+        ob_battery, reward_battery, _, _ = self._battery.step(power_cleared)
 
         # define state and reward
         self._state = np.concatenate((ob_battery, ob_market))
-        reward = power_cleared * cost * cleared_bool + reward_battery
+        reward = abs(power_cleared) * cost + reward_battery
         ob = self._get_obs()
 
         return ob, reward, done, dict()
