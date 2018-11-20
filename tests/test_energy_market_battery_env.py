@@ -21,10 +21,12 @@ class TestEnergyMarketEnv(unittest.TestCase):
 
     def test_step(self):
         self.env.reset()
-        for i in range(100):
+        reward_total = 0
+        for i in range(200):
             action = self.env.action_space.sample()
             ob_next, reward, done, _ = self.env.step(action)
-        self.assertTrue(reward <= 0)
+            reward_total += reward
+        self.assertTrue(reward_total <= 0)
 
     def test_discrete_to_continuous_action(self):
         action = self.env.action_space.sample()
