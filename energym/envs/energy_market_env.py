@@ -30,7 +30,7 @@ class EnergyMarketEnv(gym.Env):
         self._print_optimality = False
 
         # gym variables
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
         # TODO(Mathilde): Add an option for a discrete action space
         self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 
@@ -65,6 +65,9 @@ class EnergyMarketEnv(gym.Env):
 
     def step(self, action):
 
+        # TODO(Mathilde): For this first version the environment has no cost (could be in the future to use the grid's constraints
+        reward = 0
+
         if not isinstance(action, np.ndarray):
             action = np.array([action])
 
@@ -72,13 +75,26 @@ class EnergyMarketEnv(gym.Env):
             raise ValueError('The action is not in the action space')
 
         # assign values to the cvxpy parameters
-        self._p_min.value, self._p_max.value, self._cost.value = self.get_bids_actors(action, self._date)
-        self._demand.value = self.get_demand(self._date)
+        try:
+            self._p_min.value, self._p_max.value, self._cost.value = self.get_bids_actors(action, self._date)
+            self._demand.value = self.get_demand(self._date)
+        except EmptyDataException:
+            done = True
+            ob = self._get_obs()
+            return ob, reward, done, dict()
 
         # solve the problem
         self._opt_problem.solve(verbose=False)
         if self._print_optimality or "optimal" not in self._opt_problem.status:
             raise OptimizationException
+
+        price_cleared = []
+        for i in range(len(self._p.value)):
+            if self._p_min.value[i] < self._p.value[i] <= self._p_max.value[i]:
+                price_cleared.append(self._cost.value[i])
+
+        self._price_cleared = np.max(price_cleared)
+
         self._date += self._delta_time
 
         # TODO(Mathilde): Why do we need that?
@@ -88,13 +104,9 @@ class EnergyMarketEnv(gym.Env):
             ipdb.set_trace()
 
         # the state here is the price and capacity cleared
-        self._state = np.array([self._p.value[-1]])
+        self._state = np.array([self._p.value[-1], self._price_cleared])
         ob = self._get_obs()
 
-        # TODO(Mathilde): For this first version the environment has no cost (could be in the future to use the grid's constraints
-        reward = 0
-
-        # TODO(Mathilde): We could put done = True when we reach the end of the data
         done = False
 
         return ob, reward, done, dict()
@@ -102,7 +114,7 @@ class EnergyMarketEnv(gym.Env):
     def reset(self, start_date=None):
         if start_date is not None:
             self._date = start_date
-        self._state = np.array([0], dtype=np.float32)
+        self._state = np.zeros(self.observation_space.shape[0])
         return self._get_obs()
 
     def render(self, mode='rgb_array'):

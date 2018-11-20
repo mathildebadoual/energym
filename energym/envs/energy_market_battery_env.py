@@ -40,24 +40,26 @@ class EnergyMarketBatteryEnv(gym.Env):
         try:
             ob_market, _, _, _ = self._energy_market.step(np.array([power, cost]))
         except OptimizationException:
-            self._state = np.array([0, 0, 0], dtype=np.float32)
+            self._state = np.zeros(self.observation_space.shape[0])
             ob = self._get_obs()
             print('optimization exception')
             return ob, reward, done, dict()
         except EmptyDataException:
             print("end of data, resetting the environment...")
-            self._state = np.array([0, 0, 0], dtype=np.float32)
+            self._state = np.zeros(self.observation_space.shape[0])
             ob = self._get_obs()
             done = True
             return ob, reward, done, dict()
 
-        power_cleared = ob_market[0]
+        power_cleared, price_cleared = ob_market[0], ob_market[1]
+
+
 
         ob_battery, reward_battery, _, _ = self._battery.step(power_cleared)
 
         # define state and reward
         self._state = np.concatenate((ob_battery, ob_market))
-        reward = abs(power_cleared) * cost + reward_battery
+        reward = abs(power_cleared) * price_cleared + reward_battery
         ob = self._get_obs()
 
         return ob, reward, done, dict()
