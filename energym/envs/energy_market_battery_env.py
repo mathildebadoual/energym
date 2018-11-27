@@ -13,12 +13,13 @@ logger = logging.getLogger(__name__)
 
 class EnergyMarketBatteryEnv(gym.Env):
     def __init__(self, start_date=datetime.datetime(2017, 7, 3), delta_time=datetime.timedelta(hours=1)):
-        # TODO(Mathilde): If different modes, should take only continous envs
+        # TODO(Mathilde): If different modes, should take only continous envs + delta_time and start_date not defined here ...
         self._energy_market = gym.make('energy_market-v0')
         self._battery = gym.make('battery-v0')
         self._start_date = start_date
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
         self._delta_time = delta_time
+        self._date = start_date
         self._n_discrete_cost = 50
         self._n_discrete_power = 50
         self._n_discrete_actions = self._n_discrete_power * self._n_discrete_cost
@@ -43,6 +44,7 @@ class EnergyMarketBatteryEnv(gym.Env):
             self._state = np.zeros(self.observation_space.shape[0])
             ob = self._get_obs()
             print('optimization exception')
+            self._date += self._delta_time
             return ob, reward, done, dict()
         except EmptyDataException:
             print("end of data, resetting the environment...")
@@ -53,7 +55,7 @@ class EnergyMarketBatteryEnv(gym.Env):
 
         power_cleared, price_cleared = ob_market[0], ob_market[1]
 
-
+        self._date += self._delta_time
 
         ob_battery, reward_battery, _, _ = self._battery.step(power_cleared)
 
@@ -62,7 +64,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         reward = abs(power_cleared) * price_cleared + reward_battery
         ob = self._get_obs()
 
-        return ob, reward, done, dict()
+        return ob, reward, done, dict({'date': self._date})
 
     def reset(self, start_date=None):
         if start_date is not None:

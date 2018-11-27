@@ -103,13 +103,18 @@ class EnergyMarketEnv(gym.Env):
 
         done = False
 
-        return ob, reward, done, dict()
+        return ob, reward, done, dict({'date': self._date})
 
     def reset(self, start_date=None):
         if start_date is not None:
+<<<<<<< HEAD
             self._date = start_date
         else:
             self._date = self._start_date
+=======
+            self._start_date = start_date
+        self._date = self._start_date
+>>>>>>> 3144ddbfcb2f8f61a5924ec15ba4d5bad823b4ca
         self._state = np.zeros(self.observation_space.shape[0])
         return self._get_obs()
 
@@ -128,7 +133,9 @@ class EnergyMarketEnv(gym.Env):
     def get_demand(self, date):
         load = self.caiso_get_load(start_at=date, end_at=date + self._delta_time)
         load_list = load['load_MW']
+        f = lambda x: x/10
         demand = np.mean(load_list)
+        demand = f(demand)
         return demand
 
     def get_bids_actors(self, action, date):
@@ -146,7 +153,7 @@ class EnergyMarketEnv(gym.Env):
                           max(action[0], 0)])
         p_min = np.zeros(5)
         p_min[-1] = min(action[0], 0)
-        cost = np.array([2, 2, 9, 1000, action[1]])
+        cost = np.array([4, 2, 9, 12, action[1]])
         return p_min, p_max, cost
 
     def caiso_get_generation(self, start_at, end_at):

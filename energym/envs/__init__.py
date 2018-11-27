@@ -1,4 +1,3 @@
 from energym.envs.energy_market_env import EnergyMarketEnv
 from energym.envs.battery_env import BatteryEnv
 from energym.envs.energy_market_battery_env import EnergyMarketBatteryEnv
-from energym.envs.energym_utils import OptimizationException, EmptyDataException
