@@ -12,5 +12,10 @@ register(
 
 register(
         id='energy_market_battery-v0',
-        entry_point='energym.envs:EnergyMarketBatteryEnv',
+        entry_point='energym.envs:EnergyMarketBatteryEnvV0',
+)
+
+register(
+        id='energy_market_battery-v1',
+        entry_point='energym.envs:EnergyMarketBatteryEnvV1',
 )

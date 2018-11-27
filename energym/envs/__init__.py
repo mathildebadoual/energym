@@ -1,3 +1,4 @@
 from energym.envs.energy_market_env import EnergyMarketEnv
 from energym.envs.battery_env import BatteryEnv
-from energym.envs.energy_market_battery_env import EnergyMarketBatteryEnv
+from energym.envs.energy_market_battery_env_v0 import EnergyMarketBatteryEnv as EnergyMarketBatteryEnvV0
+from energym.envs.energy_market_battery_env_v1 import EnergyMarketBatteryEnv as EnergyMarketBatteryEnvV1

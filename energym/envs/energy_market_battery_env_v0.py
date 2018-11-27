@@ -47,7 +47,7 @@ class EnergyMarketBatteryEnv(gym.Env):
             self._date += self._delta_time
             return ob, reward, done, dict()
 
-        power_cleared, price_cleared = ob_market[0], ob_market[1]
+        power_cleared = ob_market[0]
 
         self._date += self._delta_time
 
@@ -55,7 +55,7 @@ class EnergyMarketBatteryEnv(gym.Env):
 
         # define state and reward
         self._state = np.concatenate((ob_battery, ob_market))
-        reward = abs(power_cleared) * price_cleared + reward_battery
+        reward = abs(power_cleared) * cost + reward_battery
         ob = self._get_obs()
 
         return ob, reward, done, dict({'date': self._date})

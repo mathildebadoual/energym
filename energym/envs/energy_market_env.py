@@ -30,7 +30,7 @@ class EnergyMarketEnv(gym.Env):
         self._print_optimality = False
 
         # gym variables
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)
         # TODO(Mathilde): Add an option for a discrete action space
         self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 
@@ -93,7 +93,7 @@ class EnergyMarketEnv(gym.Env):
         #     if self._p_min.value[i] < self._p.value[i] <= self._p_max.value[i]:
         #         price_cleared.append(self._cost.value[i])
 
-        self._price_cleared = np.max(price_cleared)
+        # self._price_cleared = np.max(price_cleared)
 
         self._date += self._delta_time
 
@@ -107,14 +107,8 @@ class EnergyMarketEnv(gym.Env):
 
     def reset(self, start_date=None):
         if start_date is not None:
-<<<<<<< HEAD
-            self._date = start_date
-        else:
-            self._date = self._start_date
-=======
             self._start_date = start_date
         self._date = self._start_date
->>>>>>> 3144ddbfcb2f8f61a5924ec15ba4d5bad823b4ca
         self._state = np.zeros(self.observation_space.shape[0])
         return self._get_obs()
 
