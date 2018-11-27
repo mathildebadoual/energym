@@ -9,7 +9,6 @@ import numpy as np
 import pytz
 import datetime
 import logging
-import ipdb
 import os
 
 logger = logging.getLogger(__name__)
@@ -21,6 +20,7 @@ class EnergyMarketEnv(gym.Env):
     def __init__(self, start_date=datetime.datetime(2017, 7, 3), delta_time=datetime.timedelta(hours=1)):
         self._num_agents = 5
         self._date = start_date
+        self._start_date = start_date
         self._delta_time = delta_time
         data_path = os.path.join(os.path.dirname(__file__), 'data')
         self._opt_problem = self.build_opt_problem()
@@ -97,12 +97,6 @@ class EnergyMarketEnv(gym.Env):
 
         self._date += self._delta_time
 
-        # TODO(Mathilde): Why do we need that?
-        try:
-            self._p.value[-1]
-        except TypeError:
-            ipdb.set_trace()
-
         # the state here is the price and capacity cleared
         self._state = np.array([self._p.value[-1], self._price_cleared])
         ob = self._get_obs()
@@ -114,6 +108,8 @@ class EnergyMarketEnv(gym.Env):
     def reset(self, start_date=None):
         if start_date is not None:
             self._date = start_date
+        else:
+            self._date = self._start_date
         self._state = np.zeros(self.observation_space.shape[0])
         return self._get_obs()
 
@@ -138,6 +134,7 @@ class EnergyMarketEnv(gym.Env):
     def get_bids_actors(self, action, date):
         gen = self.caiso_get_generation(start_at=date, end_at=date + self._delta_time)
         if gen.empty:
+
             raise EmptyDataException
         gen_wind_list = gen[gen['fuel_name'] == 'wind']['gen_MW'].values
         gen_solar_list = gen[gen['fuel_name'] == 'solar']['gen_MW'].values
