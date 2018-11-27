@@ -82,17 +82,17 @@ class EnergyMarketEnv(gym.Env):
         except EmptyDataException:
             done = True
             ob = self._get_obs()
-            return ob, reward, done, dict()
+            return ob, reward, done, dict({'date': self._date})
 
         # solve the problem
         self._opt_problem.solve(verbose=False)
         if self._print_optimality or "optimal" not in self._opt_problem.status:
             raise OptimizationException
 
-        price_cleared = []
-        for i in range(len(self._p.value)):
-            if self._p_min.value[i] < self._p.value[i] <= self._p_max.value[i]:
-                price_cleared.append(self._cost.value[i])
+        # price_cleared = []
+        # for i in range(len(self._p.value)):
+        #     if self._p_min.value[i] < self._p.value[i] <= self._p_max.value[i]:
+        #         price_cleared.append(self._cost.value[i])
 
         self._price_cleared = np.max(price_cleared)
 
@@ -105,7 +105,7 @@ class EnergyMarketEnv(gym.Env):
             ipdb.set_trace()
 
         # the state here is the price and capacity cleared
-        self._state = np.array([self._p.value[-1], self._price_cleared])
+        self._state = np.array([self._p.value[-1]])
         ob = self._get_obs()
 
         done = False
