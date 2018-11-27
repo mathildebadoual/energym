@@ -10,4 +10,3 @@ cvxpy
 pandas
 datetime
 pytz
-ipdb

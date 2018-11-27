@@ -62,9 +62,10 @@ class EnergyMarketBatteryEnv(gym.Env):
 
     def reset(self, start_date=None):
         if start_date is not None:
-            self._start_date = start_date
-        self._date = self._start_date
-        ob_market = self._energy_market.reset(self._start_date)
+            self._date = start_date
+        else:
+            self._date = self._start_date
+        ob_market = self._energy_market.reset(self._date)
         ob_battery = self._battery.reset()
         self._state = np.concatenate((ob_market, ob_battery))
         return self._get_obs()
