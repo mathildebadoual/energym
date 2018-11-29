@@ -30,6 +30,6 @@ class TestEnergyMarketEnv(unittest.TestCase):
 
     def test_discrete_to_continuous_action(self):
         action = self.env.action_space.sample()
-        quantity, cost = self.env._discrete_to_continuous_action(action)
+        quantity, cost = self.env.discrete_to_continuous_action(action)
         self.assertIsInstance(quantity, float)
         self.assertIsInstance(cost, float)

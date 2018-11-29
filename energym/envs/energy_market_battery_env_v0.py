@@ -34,7 +34,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         self.action_space = spaces.Discrete(self._n_discrete_actions)
 
     def step(self, action):
-        power, cost = self._discrete_to_continuous_action(action)
+        power, cost = self.discrete_to_continuous_action(action)
         done = False
         reward = 0
 
@@ -91,7 +91,7 @@ class EnergyMarketBatteryEnv(gym.Env):
     def _cost_precision(self):
         return (self._max_cost - self._min_cost) / self._n_discrete_cost
 
-    def _discrete_to_continuous_action(self, discrete_action):
+    def discrete_to_continuous_action(self, discrete_action):
         """
         maps the integer discrete_action to the grid (power, cost)
         :param discrete_action: int

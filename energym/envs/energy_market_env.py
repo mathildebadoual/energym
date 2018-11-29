@@ -17,17 +17,20 @@ logger = logging.getLogger(__name__)
 class EnergyMarketEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, start_date=datetime.datetime(2017, 7, 3), delta_time=datetime.timedelta(hours=1)):
+    def __init__(self, data_dir_name='data'):
         self._num_agents = 5
-        self._date = start_date
-        self._start_date = start_date
-        self._delta_time = delta_time
-        data_path = os.path.join(os.path.dirname(__file__), 'data')
+
+
+        data_path = os.path.join(os.path.dirname(__file__), data_dir_name)
         self._opt_problem = self.build_opt_problem()
         self._gen_df = pd.read_pickle(data_path + "/gen_caiso.pkl")
         self._dem_df = pd.read_pickle(data_path + "/dem_caiso.pkl")
         self._timezone = pytz.timezone("America/Los_Angeles")
         self._print_optimality = False
+
+        self._start_date = pd.to_datetime(self._gen_df['timestamp'][0], unit='s')
+        self._date = self._start_date
+        self._delta_time = pd.to_datetime(self._gen_df['timestamp'][1], unit='s') - self._start_date
 
         # gym variables
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)
@@ -151,13 +154,25 @@ class EnergyMarketEnv(gym.Env):
         return p_min, p_max, cost
 
     def caiso_get_generation(self, start_at, end_at):
-        start_date_aware = self._timezone.localize(start_at)
-        end_date_aware = self._timezone.localize(end_at)
+        if start_at.tzinfo is None or start_at.tzinfo.utcoffset(start_at) is None:
+            start_date_aware = self._timezone.localize(start_at)
+        else:
+            start_date_aware = start_at
+        if end_at.tzinfo is None or end_at.tzinfo.utcoffset(end_at) is None:
+            end_date_aware = self._timezone.localize(end_at)
+        else:
+            end_date_aware = end_at
         return self._gen_df[(start_date_aware <= self._gen_df["timestamp"]) &
                            (end_date_aware > self._gen_df["timestamp"])]
 
     def caiso_get_load(self, start_at, end_at):
-        start_date_aware = self._timezone.localize(start_at)
-        end_date_aware = self._timezone.localize(end_at)
+        if start_at.tzinfo is None or start_at.tzinfo.utcoffset(start_at) is None:
+            start_date_aware = self._timezone.localize(start_at)
+        else:
+            start_date_aware = start_at
+        if end_at.tzinfo is None or end_at.tzinfo.utcoffset(end_at) is None:
+            end_date_aware = self._timezone.localize(end_at)
+        else:
+            end_date_aware = end_at
         return self._dem_df[(start_date_aware <= self._dem_df["timestamp"]) &
                            (end_date_aware > self._dem_df["timestamp"])]
