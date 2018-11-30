@@ -12,7 +12,7 @@ class BatteryEnv(gym.Env):
 
     def __init__(self):
         # limitation parameters
-        self._max_soe = 10000  # soe = state of energy in MW
+        self._max_soe = 5000  # soe = state of energy in MW
         self._min_soe = 0
         self._max_power = 1000  # power to charge or discharge
         self._min_power = -1000

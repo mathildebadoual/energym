@@ -16,7 +16,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         # TODO(Mathilde): If different modes, should take only continous envs + delta_time and start_date not defined here ...
         self._energy_market = gym.make('energy_market-v0')
         self._battery = gym.make('battery-v0')
-        self._start_date = start_date
+        self._start_date = self._energy_market.get_start_date()
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
         self._delta_time = delta_time
         self._date = start_date
@@ -32,6 +32,9 @@ class EnergyMarketBatteryEnv(gym.Env):
                                                    self._energy_market.observation_space.shape[0],),
                                             dtype=np.float32)
         self.action_space = spaces.Discrete(self._n_discrete_actions)
+
+    def get_start_date(self):
+        return self._start_date
 
     def step(self, action):
         power, cost = self.discrete_to_continuous_action(action)

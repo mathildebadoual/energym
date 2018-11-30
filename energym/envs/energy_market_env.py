@@ -15,22 +15,25 @@ logger = logging.getLogger(__name__)
 
 
 class EnergyMarketEnv(gym.Env):
+
+    # TODO(Mathilde): enter the data as a df when initializing the module
+
     metadata = {'render.modes': ['human']}
 
     def __init__(self, data_dir_name='data'):
         self._num_agents = 5
 
-
         data_path = os.path.join(os.path.dirname(__file__), data_dir_name)
         self._opt_problem = self.build_opt_problem()
         self._gen_df = pd.read_pickle(data_path + "/gen_caiso.pkl")
         self._dem_df = pd.read_pickle(data_path + "/dem_caiso.pkl")
+        self._price_benchmark = self.get_price_benchmark(data_path)
         self._timezone = pytz.timezone("America/Los_Angeles")
         self._print_optimality = False
 
-        self._start_date = pd.to_datetime(self._gen_df['timestamp'][0], unit='s')
+        self._start_date = pd.to_datetime(self._gen_df['timestamp'][0])
         self._date = self._start_date
-        self._delta_time = pd.to_datetime(self._gen_df['timestamp'][1], unit='s') - self._start_date
+        self._delta_time = datetime.timedelta(hours=1)
 
         # gym variables
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)
@@ -41,6 +44,16 @@ class EnergyMarketEnv(gym.Env):
         self._state = np.array([0], dtype=np.float32)
 
         self.reset()
+
+    def get_price_benchmark(self, data_path):
+        df = pd.read_csv(os.path.join(data_path, 'nodes_subset50.csv'))
+        df = df[df['node'] == 'ALAMT5G_7_N002']
+        df1 = df[['dollar_mw', 'time', 'hr']]
+        data_price = df1.groupby('hr').mean()
+        return data_price
+
+    def get_start_date(self):
+        return self._start_date
 
     def build_opt_problem(self):
         # build parameters
@@ -84,19 +97,19 @@ class EnergyMarketEnv(gym.Env):
         except EmptyDataException:
             done = True
             ob = self._get_obs()
-            return ob, reward, done, dict({'date': self._date})
+            return ob, reward, done, dict({'date': self._date, 'price_cleared': self._price_cleared})
 
         # solve the problem
         self._opt_problem.solve(verbose=False)
         if self._print_optimality or "optimal" not in self._opt_problem.status:
             raise OptimizationException
 
-        # price_cleared = []
-        # for i in range(len(self._p.value)):
-        #     if self._p_min.value[i] < self._p.value[i] <= self._p_max.value[i]:
-        #         price_cleared.append(self._cost.value[i])
+        price_cleared_list = []
+        for i in range(len(self._p.value)):
+            if self._p_min.value[i] < self._p.value[i] <= self._p_max.value[i]:
+                price_cleared_list.append(self._cost.value[i])
 
-        # self._price_cleared = np.max(price_cleared)
+        self._price_cleared = np.max(price_cleared_list)
 
         self._date += self._delta_time
 
@@ -106,7 +119,7 @@ class EnergyMarketEnv(gym.Env):
 
         done = False
 
-        return ob, reward, done, dict({'date': self._date})
+        return ob, reward, done, dict({'date': self._date, 'price_cleared': self._price_cleared})
 
     def reset(self, start_date=None):
         if start_date is not None:
@@ -129,6 +142,8 @@ class EnergyMarketEnv(gym.Env):
 
     def get_demand(self, date):
         load = self.caiso_get_load(start_at=date, end_at=date + self._delta_time)
+        if load.empty:
+            raise EmptyDataException
         load_list = load['load_MW']
         f = lambda x: x/10
         demand = np.mean(load_list)
@@ -138,7 +153,6 @@ class EnergyMarketEnv(gym.Env):
     def get_bids_actors(self, action, date):
         gen = self.caiso_get_generation(start_at=date, end_at=date + self._delta_time)
         if gen.empty:
-
             raise EmptyDataException
         gen_wind_list = gen[gen['fuel_name'] == 'wind']['gen_MW'].values
         gen_solar_list = gen[gen['fuel_name'] == 'solar']['gen_MW'].values
@@ -150,7 +164,8 @@ class EnergyMarketEnv(gym.Env):
                           max(action[0], 0)])
         p_min = np.zeros(5)
         p_min[-1] = min(action[0], 0)
-        cost = np.array([4, 2, 9, 12, action[1]])
+        price_benchmark = self._price_benchmark.iloc[date.hour].values[0]
+        cost = np.array([price_benchmark + np.random.normal(0, 1) + 2, price_benchmark + np.random.normal(0, 1)- 1.5, price_benchmark + np.random.normal(0, 2) + 7, price_benchmark + 10, action[1]])
         return p_min, p_max, cost
 
     def caiso_get_generation(self, start_at, end_at):
