@@ -53,7 +53,7 @@ class EnergyMarketEnv(gym.Env):
         new_data_price = df2.copy()
         for i in range(df2.shape[0]):
             new_data_price['dollar_mw'].loc[i] = df2['dollar_mw'][i]
-        return df2
+        return new_data_price
 
     def get_start_date(self):
         return self._start_date
