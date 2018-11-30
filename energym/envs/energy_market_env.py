@@ -46,7 +46,7 @@ class EnergyMarketEnv(gym.Env):
         self.reset()
 
     def get_price_benchmark(self, data_path):
-        df = pd.read_csv(os.path.join(data_path, 'nodes_subset50.csv'))
+        df = pd.read_csv(os.path.join(data_path, 'prices_benchmark.csv'))
         df = df[df['node'] == 'ALAMT5G_7_N002']
         df1 = df[['dollar_mw', 'time', 'hr']]
         data_price = df1.groupby('hr').mean()
@@ -165,7 +165,7 @@ class EnergyMarketEnv(gym.Env):
         p_min = np.zeros(5)
         p_min[-1] = min(action[0], 0)
         price_benchmark = self._price_benchmark.iloc[date.hour].values[0]
-        cost = np.array([price_benchmark + np.random.normal(0, 1) + 2, price_benchmark + np.random.normal(0, 1)- 1.5, price_benchmark + np.random.normal(0, 2) + 7, price_benchmark + 10, action[1]])
+        cost = np.array([price_benchmark + np.random.normal(0, 1) + 2, price_benchmark + np.random.normal(0, 1) - 1.5, price_benchmark + np.random.normal(0, 2) + 7, price_benchmark + 10, action[1]])
         return p_min, p_max, cost
 
     def caiso_get_generation(self, start_at, end_at):
