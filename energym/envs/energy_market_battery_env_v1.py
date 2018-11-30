@@ -104,6 +104,10 @@ class EnergyMarketBatteryEnv(gym.Env):
     def _cost_precision(self):
         return (self._max_cost - self._min_cost) / self._n_discrete_cost
 
+    @property
+    def date(self):
+        return self._date
+
     def discrete_to_continuous_action(self, discrete_action):
         """
         maps the integer discrete_action to the grid (power, cost)
