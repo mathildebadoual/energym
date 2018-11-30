@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 from gym import error, spaces, utils
 from gym.utils import seeding
-from energym.envs.utils import OptimizationException, EmptyDataException
+from energym.envs.utils import OptimizationException, EmptyDataException, ExpertAgent
 
 import logging
 logger = logging.getLogger(__name__)
@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class EnergyMarketBatteryEnv(gym.Env):
-    def __init__(self, start_date=datetime.datetime(2017, 7, 3), delta_time=datetime.timedelta(hours=1)):
+    def __init__(self):
         # TODO(Mathilde): If different modes, should take only continous envs + delta_time and start_date not defined here ...
         self._energy_market = gym.make('energy_market-v0')
         self._battery = gym.make('battery-v0')
         self._start_date = self._energy_market.get_start_date()
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
-        self._delta_time = delta_time
-        self._date = start_date
+        self._delta_time = delta_time=datetime.timedelta(hours=1)
+        self._date = datetime.timedelta(hours=1)
         self._n_discrete_cost = 50
         self._n_discrete_power = 50
         self._n_discrete_actions = self._n_discrete_power * self._n_discrete_cost
@@ -33,16 +33,26 @@ class EnergyMarketBatteryEnv(gym.Env):
                                             dtype=np.float32)
         self.action_space = spaces.Discrete(self._n_discrete_actions)
 
+        self.expert = ExpertAgent()
+
     def get_start_date(self):
         return self._start_date
 
-    def step(self, action):
-        power, cost = self.discrete_to_continuous_action(action)
+    def step(self, action_dqn):
+        power, cost = self.discrete_to_continuous_action(action_dqn)
+        action_dqn = np.array([power, cost])
+
+        planned_actions = self.expert.planning(self._date)
+        action_expert = planned_actions[0]
+
+        action = action_expert + action_dqn
+        print('action: ', action)
+            
         done = False
         reward = 0
 
         try:
-            ob_market, _, done, _ = self._energy_market.step(np.array([power, cost]))
+            ob_market, _, done, _ = self._energy_market.step()
         except OptimizationException:
             self._state = np.zeros(self.observation_space.shape[0])
             ob = self._get_obs()

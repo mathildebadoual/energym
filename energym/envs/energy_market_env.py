@@ -48,9 +48,12 @@ class EnergyMarketEnv(gym.Env):
     def get_price_benchmark(self, data_path):
         df = pd.read_csv(os.path.join(data_path, 'prices_benchmark.csv'))
         df = df[df['node'] == 'ALAMT5G_7_N002']
-        df1 = df[['dollar_mw', 'time', 'hr']]
-        data_price = df1.groupby('hr').mean()
-        return data_price
+        df1 = df[['dollar_mw', 'hr']]
+        df2 = df1.groupby('hr').mean()
+        new_data_price = df2.copy()
+        for i in range(df2.shape[0]):
+            new_data_price['dollar_mw'].loc[i] = df2['dollar_mw'][i]
+        return df2
 
     def get_start_date(self):
         return self._start_date
