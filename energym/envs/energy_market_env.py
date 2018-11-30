@@ -25,9 +25,10 @@ class EnergyMarketEnv(gym.Env):
 
         data_path = os.path.join(os.path.dirname(__file__), data_dir_name)
         self._opt_problem = self.build_opt_problem()
-        self._gen_df = pd.read_pickle(data_path + "/gen_caiso.pkl")
-        self._dem_df = pd.read_pickle(data_path + "/dem_caiso.pkl")
+        self._gen_df = pd.read_pickle(data_path + "/gen_caiso_train.pkl")
+        self._dem_df = pd.read_pickle(data_path + "/dem_caiso_train.pkl")
         self._price_benchmark = self.get_price_benchmark(data_path)
+
         self._timezone = pytz.timezone("America/Los_Angeles")
         self._print_optimality = False
 
@@ -112,7 +113,7 @@ class EnergyMarketEnv(gym.Env):
             if self._p_min.value[i] < self._p.value[i] <= self._p_max.value[i]:
                 price_cleared_list.append(self._cost.value[i])
 
-        self._price_cleared = np.max(price_cleared_list)
+        self._price_cleared = np.max([0] + price_cleared_list)
 
         self._date += self._delta_time
 
