@@ -25,8 +25,8 @@ class EnergyMarketEnv(gym.Env):
 
         data_path = os.path.join(os.path.dirname(__file__), data_dir_name)
         self._opt_problem = self.build_opt_problem()
-        self._gen_df = pd.read_pickle(data_path + "/gen_caiso_train.pkl")
-        self._dem_df = pd.read_pickle(data_path + "/dem_caiso_train.pkl")
+        self._gen_df = pd.read_pickle(data_path + "/gen_caiso.pkl")
+        self._dem_df = pd.read_pickle(data_path + "/dem_caiso.pkl")
         self._price_benchmark = self.get_price_benchmark(data_path)
 
         self._timezone = pytz.timezone("America/Los_Angeles")
