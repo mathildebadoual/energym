@@ -18,6 +18,10 @@ class BatteryEnv(gym.Env):
         self._min_power = -1000
         self._efficiency_ratio = 0.99
 
+        # cost when close to limits
+        self._cost_lim_power = -1000
+        self._cost_lim_soe = -1000
+
         # gym variables
         self.observation_space = spaces.Box(low=self._min_soe, high=self._max_soe, shape=(1,), dtype=np.float32)
         # TODO(Mathilde): Add option for a discrete action space (for now it is continuous)
@@ -32,15 +36,16 @@ class BatteryEnv(gym.Env):
         if not isinstance(action, np.ndarray):
             action = np.array([action])
 
-        penalty = - 10000000
         energy_to_add = self._efficiency_ratio * action
-        if self.action_space.contains(abs(energy_to_add)):
-            next_soe = self._state + energy_to_add
-            if self.observation_space.contains(next_soe):
-                self._state = next_soe
-                penalty = 0
+        next_soe = self._state + energy_to_add
+        reward = -10000
+        if self.action_space.contains(abs(energy_to_add)) and self.observation_space.contains(next_soe):
+            self._state = next_soe
+            cost_lim_power = self._cost_lim_power * (np.log(self._max_power - energy_to_add[0]) + np.log(energy_to_add[0] - self._min_power))
+            cost_lim_soe = self._cost_lim_soe * (np.log(self._max_soe - next_soe[0]) + np.log(next_soe[0] - self._min_soe))
+            reward = cost_lim_power + cost_lim_soe
+            print(reward)
 
-        reward = penalty
         ob = self._get_obs()
 
         # TODO(Mathilde): define when it is done for this env

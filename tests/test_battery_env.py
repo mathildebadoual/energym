@@ -48,4 +48,4 @@ class TestBatteryEnv(unittest.TestCase):
         action = 10000
         self.env.reset()
         ob_next, reward, done, _ = self.env.step(action)
-        self.assertEqual(reward, -10000000)
+        self.assertEqual(reward, -10000)
