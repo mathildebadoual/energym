@@ -1,3 +1,4 @@
+cvxopt
 codecov
 coverage
 cython
@@ -10,4 +11,3 @@ cvxpy
 pandas
 datetime
 pytz
-cvxopt
