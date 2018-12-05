@@ -52,7 +52,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         reward = 0
 
         try:
-            ob_market, _, done, _ = self._energy_market.step()
+            ob_market, _, done, _ = self._energy_market.step(action)
         except OptimizationException:
             self._state = np.zeros(self.observation_space.shape[0])
             ob = self._get_obs()

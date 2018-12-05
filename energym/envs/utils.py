@@ -32,7 +32,7 @@ class ExpertAgent(object):
         self.battery = gym.make('battery-v0')
 
         # to create the prediction prices (perfect forecast)
-        self.data_path = 'data'
+        self.data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
         self.price_prediction_file_path = os.path.join(self.data_path, "price_prediction.csv")
         self.get_prediction_cleared_prices()
         self.price_prediction_df = self.load_price_predictions()
