@@ -10,3 +10,4 @@ cvxpy
 pandas
 datetime
 pytz
+cvxopt
