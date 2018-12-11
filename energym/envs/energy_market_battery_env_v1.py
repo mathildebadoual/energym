@@ -20,8 +20,8 @@ class EnergyMarketBatteryEnv(gym.Env):
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
         self._delta_time = delta_time=datetime.timedelta(hours=1)
         self._date = datetime.timedelta(hours=1)
-        self._n_discrete_cost = 100
-        self._n_discrete_power = 100
+        self._n_discrete_cost = 40
+        self._n_discrete_power = 20
         self._n_discrete_actions = self._n_discrete_power * self._n_discrete_cost
         self._min_cost, self._max_cost = -20, 20
         self._min_power, self._max_power = self._battery.action_space.low[0], self._battery.action_space.high[0]
