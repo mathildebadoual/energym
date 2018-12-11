@@ -51,10 +51,10 @@ class EnergyMarketEnv(gym.Env):
         df = df[df['node'] == 'ALAMT5G_7_N002']
         df1 = df[['dollar_mw', 'hr']]
         df2 = df1.groupby('hr').mean()
-        new_data_price = df2.copy()
-        for i in range(df2.shape[0]):
-            new_data_price['dollar_mw'].loc[i] = df2['dollar_mw'][i]
-        return new_data_price
+        # new_data_price = df2.copy()
+        # for i in range(df2.shape[0]):
+        #     new_data_price['dollar_mw'].loc[i] = df2['dollar_mw'][i]
+        return df2
 
     def get_start_date(self):
         return self._start_date
@@ -97,11 +97,13 @@ class EnergyMarketEnv(gym.Env):
         # assign values to the cvxpy parameters
         try:
             self._p_min.value, self._p_max.value, self._cost.value = self.get_bids_actors(action, self._date)
-            self._demand.value = self.get_demand(self._date)
+            self._demand.value = self.get_demand(self._date) + action[0]
         except EmptyDataException:
             done = True
             ob = self._get_obs()
-            return ob, reward, done, dict({'date': self._date, 'price_cleared': self._price_cleared})
+            return ob, reward, done, dict({'date': self._date, 'price_cleared': None, 'ref_price': None})
+
+        ref_price = self._cost.value[0]
 
         # solve the problem
         self._opt_problem.solve(verbose=False)
@@ -110,20 +112,24 @@ class EnergyMarketEnv(gym.Env):
 
         price_cleared_list = []
         for i in range(len(self._p.value)):
-            if self._p_min.value[i] < self._p.value[i] <= self._p_max.value[i]:
+            if self._p_min.value[i] + 1 < self._p.value[i] <= self._p_max.value[i]:
                 price_cleared_list.append(self._cost.value[i])
 
-        self._price_cleared = np.max([0] + price_cleared_list)
+        price_cleared = np.max([0] + price_cleared_list)
 
         self._date += self._delta_time
 
         # the state here is the price and capacity cleared
-        self._state = np.array([self._p.value[-1]])
+        if action[0] > 0:
+            self._state = np.array([self._p.value[-1]])
+        else:
+            self._state = np.array([action[0]])
+
         ob = self._get_obs()
 
         done = False
 
-        return ob, reward, done, dict({'date': self._date, 'price_cleared': self._price_cleared})
+        return ob, reward, done, dict({'date': self._date, 'price_cleared': price_cleared, 'ref_price': ref_price})
 
     def reset(self, start_date=None):
         if start_date is not None:
@@ -167,8 +173,11 @@ class EnergyMarketEnv(gym.Env):
                           100000 + 10000 * (np.mean(gen_wind_list) + np.mean(gen_solar_list) + np.mean(gen_other_list)),
                           max(action[0], 0)])
         p_min = np.zeros(5)
-        p_min[-1] = min(action[0], 0)
-        price_benchmark = self._price_benchmark.iloc[date.hour].values[0]
+        # p_min[-1] = min(action[0], 0)
+        price_benchmark = self._price_benchmark.loc[date.hour].values[0]
+        # to avaoid using the agent when it is buying energy 
+        if action[0] <= 0:
+            action[1] = 100000
         cost = np.array([price_benchmark + np.random.normal(0, 1) + 2, price_benchmark + np.random.normal(0, 1) - 1.5, price_benchmark + np.random.normal(0, 2) + 7, price_benchmark + 10, action[1]])
         return p_min, p_max, cost
 

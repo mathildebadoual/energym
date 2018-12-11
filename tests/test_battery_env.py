@@ -43,9 +43,10 @@ class TestBatteryEnv(unittest.TestCase):
         action = np.array([2])
         ob = self.env.reset()
         ob_next, reward, done, _ = self.env.step(action)
-        self.assertEqual(ob + self.env._efficiency_ratio * action, ob_next)
+        self.assertEqual(ob - self.env._efficiency_ratio * action, ob_next)
 
         action = 10000
         self.env.reset()
+        reward_obj = self.env.get_penalty(np.array([action]))
         ob_next, reward, done, _ = self.env.step(action)
-        self.assertEqual(reward, -10000)
+        self.assertEqual(reward, reward_obj)

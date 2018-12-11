@@ -99,9 +99,9 @@ class ExpertAgent(object):
         self.price_predictions_interval.value = np.resize(values_planning_horizon.values[:self.time_horizon], (self.time_horizon,))
         self.initial_soe.value = self.memory_dict['soe'][-1]
 
-        logging.info('---- Solve Optimization ----')
+        # logging.info('---- Solve Optimization ----')
         self.problem.solve(solver=cvx.CVXOPT, verbose=False)
-        logging.info('---- Status: %s ----' % self.problem.status)
+        # logging.info('---- Status: %s ----' % self.problem.status)
         planned_actions = self.planned_power.value
         return planned_actions
 

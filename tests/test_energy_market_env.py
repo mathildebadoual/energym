@@ -16,7 +16,7 @@ class TestEnergyMarketEnv(unittest.TestCase):
         ob = self.env.reset()
         self.assertTrue(ob_space.contains(ob))
 
-        a = np.array([960, 14.8])
+        a = np.array([369, 31])
         observation, reward, done, _info = self.env.step(a)
         self.assertTrue(ob_space.contains(observation))
         self.assertTrue(np.isscalar(reward))

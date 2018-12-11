@@ -20,16 +20,16 @@ class EnergyMarketBatteryEnv(gym.Env):
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
         self._delta_time = delta_time=datetime.timedelta(hours=1)
         self._date = datetime.timedelta(hours=1)
-        self._n_discrete_cost = 50
-        self._n_discrete_power = 50
+        self._n_discrete_cost = 100
+        self._n_discrete_power = 100
         self._n_discrete_actions = self._n_discrete_power * self._n_discrete_cost
-        self._min_cost, self._max_cost = 0, 20
+        self._min_cost, self._max_cost = -20, 20
         self._min_power, self._max_power = self._battery.action_space.low[0], self._battery.action_space.high[0]
 
         # gym variables
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf,
                                             shape=(self._battery.observation_space.shape[0] +
-                                                   self._energy_market.observation_space.shape[0],),
+                                                   self._energy_market.observation_space.shape[0] + 1,),
                                             dtype=np.float32)
         self.action_space = spaces.Discrete(self._n_discrete_actions)
 
@@ -43,16 +43,18 @@ class EnergyMarketBatteryEnv(gym.Env):
         action_dqn = np.array([power, cost])
 
         planned_actions = self.expert.planning(self._date)
-        action_expert = planned_actions[0]
+        action_expert = np.array([planned_actions[0], self.expert.price_predictions_interval.value[0]])
 
         action = action_expert + action_dqn
-        print('action: ', action)
             
         done = False
         reward = 0
 
+        # first put the penalty (shielding)
+        reward = self._battery.get_penalty(action[0])
+
         try:
-            ob_market, _, done, _ = self._energy_market.step(action)
+            ob_market, _, done, info_market = self._energy_market.step(action)
         except OptimizationException:
             self._state = np.zeros(self.observation_space.shape[0])
             ob = self._get_obs()
@@ -64,14 +66,26 @@ class EnergyMarketBatteryEnv(gym.Env):
 
         self._date += self._delta_time
 
+        if -10 < power_cleared < 10:
+            power_cleared = 0
+            reward += -10000
+
         ob_battery, reward_battery, _, _ = self._battery.step(power_cleared)
 
         # define state and reward
-        self._state = np.concatenate((ob_battery, ob_market))
-        reward = abs(power_cleared) * cost + reward_battery
+        self._state = np.concatenate((ob_market, ob_battery, np.array([planned_actions[1]])))
+        reward += reward_battery
+        if reward_battery >= 0 and not done:
+            reward += min(power_cleared, 0) * info_market['price_cleared']
+            reward += max(power_cleared, 0) * cost
         ob = self._get_obs()
 
-        return ob, reward, done, dict({'date': self._date})
+        return ob, reward, done, dict({
+            'date': self._date, 
+            'price_cleared': info_market['price_cleared'], 
+            'ref_price': info_market['ref_price'], 
+            'action_tot': action
+            })
 
     def reset(self, start_date=None):
         if start_date is not None:
@@ -80,7 +94,7 @@ class EnergyMarketBatteryEnv(gym.Env):
             self._date = self._start_date
         ob_market = self._energy_market.reset(self._date)
         ob_battery = self._battery.reset()
-        self._state = np.concatenate((ob_market, ob_battery))
+        self._state = np.concatenate((ob_market, ob_battery, np.array([0])))
         return self._get_obs()
 
     def render(self, mode='rgb_array'):
@@ -118,3 +132,10 @@ class EnergyMarketBatteryEnv(gym.Env):
         cost = self._min_cost + (discrete_action // self._n_discrete_power) * self._cost_precision
 
         return power, cost
+
+    def is_safe(self, action_index):
+        power, cost = self.discrete_to_continuous_action(action_index)
+        planned_actions = self.expert.planning(self._date)
+        action_expert = np.array([planned_actions[0], self.expert.price_predictions_interval.value[0]])
+        action = action_expert + action_dqn
+        return self._battery.is_safe(action[0])
