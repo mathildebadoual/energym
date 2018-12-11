@@ -37,7 +37,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         return self._start_date
 
     def step(self, action):
-        if type(action) == int:
+        if type(action) == int or True:
             power, cost = self.discrete_to_continuous_action(action)
         else:
             power, cost = action[0], action[1]
@@ -108,3 +108,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         cost = self._min_cost + (discrete_action // self._n_discrete_power) * self._cost_precision
 
         return power, cost
+
+    def is_safe(self, action_index):
+        power, cost = self.discrete_to_continuous_action(action_index)
+        return self._battery.is_safe(power)

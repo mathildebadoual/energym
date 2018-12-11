@@ -67,3 +67,12 @@ class BatteryEnv(gym.Env):
 
     def get_parameters_battery(self):
         return self._max_soe, self._min_soe, self._max_power, self._min_power, self._efficiency_ratio
+
+    def is_safe(self, power):
+        energy_to_add = self._efficiency_ratio * power
+        if self.action_space.contains(abs(energy_to_add)):
+            next_soe = self._state + energy_to_add
+            if self.observation_space.contains(next_soe):
+                return True
+
+        return False
