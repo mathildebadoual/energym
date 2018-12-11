@@ -135,6 +135,7 @@ class EnergyMarketBatteryEnv(gym.Env):
 
     def is_safe(self, action_index):
         power, cost = self.discrete_to_continuous_action(action_index)
+        action_dqn = np.array([power, cost])
         planned_actions = self.expert.planning(self._date)
         action_expert = np.array([planned_actions[0], self.expert.price_predictions_interval.value[0]])
         action = action_expert + action_dqn
