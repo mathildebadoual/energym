@@ -86,7 +86,9 @@ class BatteryEnv(gym.Env):
         return reward
 
     def is_safe(self, action):
-        energy_to_add =  - self._efficiency_ratio * action
+        if not isinstance(action, np.ndarray):
+            action = np.array([action])
+        energy_to_add = -self._efficiency_ratio * action
         next_soe = self._state + energy_to_add
         if self.action_space.contains(abs(energy_to_add)) and self.observation_space.contains(next_soe):
             return True
