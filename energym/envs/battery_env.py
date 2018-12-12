@@ -19,8 +19,8 @@ class BatteryEnv(gym.Env):
         self._efficiency_ratio = 0.99
 
         # cost when close to limits
-        self._cost_lim_power = 100
-        self._cost_lim_soe = 100
+        self._cost_lim_power = 0.1
+        self._cost_lim_soe = 0.1
 
         # gym variables
         self.observation_space = spaces.Box(low=self._min_soe, high=self._max_soe, shape=(1,), dtype=np.float32)
@@ -76,7 +76,9 @@ class BatteryEnv(gym.Env):
         if not isinstance(power, np.ndarray):
             power = np.array([power])
         energy_to_add = self._efficiency_ratio * power
+        # print('energy_to_add: ', energy_to_add)
         next_soe = self._state - energy_to_add
+        # print('next_soe: ', next_soe)
         reward = 0
         cost_lim_power = self._cost_lim_power * (min(self._max_power - energy_to_add[0], 0) + min(energy_to_add[0] - self._min_power, 0))
         cost_lim_soe = self._cost_lim_soe * (min(self._max_soe - next_soe[0], 0) + min(next_soe[0] - self._min_soe, 0))
@@ -85,9 +87,12 @@ class BatteryEnv(gym.Env):
         reward = cost_lim_power + cost_lim_soe
         return reward
 
-    def is_safe(self, action):
-        energy_to_add =  - self._efficiency_ratio * action
+    def is_safe(self, power):
+        if not isinstance(power, np.ndarray):
+            power = np.array([power])
+        energy_to_add =  - self._efficiency_ratio * power
         next_soe = self._state + energy_to_add
         if self.action_space.contains(abs(energy_to_add)) and self.observation_space.contains(next_soe):
             return True
-        return False
+        else:
+            return False

@@ -20,8 +20,8 @@ class EnergyMarketBatteryEnv(gym.Env):
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
         self._delta_time = delta_time=datetime.timedelta(hours=1)
         self._date = datetime.timedelta(hours=1)
-        self._n_discrete_cost = 40
-        self._n_discrete_power = 20
+        self._n_discrete_cost = 80
+        self._n_discrete_power = 2000
         self._n_discrete_actions = self._n_discrete_power * self._n_discrete_cost
         self._min_cost, self._max_cost = -20, 20
         self._min_power, self._max_power = self._battery.action_space.low[0], self._battery.action_space.high[0]
@@ -54,7 +54,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         reward = self._battery.get_penalty(action[0])
 
         try:
-            ob_market, _, done, info_market = self._energy_market.step(action)
+            ob_market, _, done, info_market = self._energy_market.step(action.copy())
         except OptimizationException:
             self._state = np.zeros(self.observation_space.shape[0])
             ob = self._get_obs()
@@ -66,16 +66,15 @@ class EnergyMarketBatteryEnv(gym.Env):
 
         self._date += self._delta_time
 
-        if -10 < power_cleared < 10:
+        if -2 < power_cleared < 2 and action[0] != 0:
             power_cleared = 0
-            reward += -10000
+            reward += -50
 
         ob_battery, reward_battery, _, _ = self._battery.step(power_cleared)
 
         # define state and reward
         self._state = np.concatenate((ob_market, ob_battery, np.array([planned_actions[1]])))
-        reward += reward_battery
-        if reward_battery >= 0 and not done:
+        if reward_battery == 0 and not done:
             reward += min(power_cleared, 0) * info_market['price_cleared']
             reward += max(power_cleared, 0) * cost
         ob = self._get_obs()
@@ -135,8 +134,6 @@ class EnergyMarketBatteryEnv(gym.Env):
 
     def is_safe(self, action_index):
         power, cost = self.discrete_to_continuous_action(action_index)
-        action_dqn = np.array([power, cost])
         planned_actions = self.expert.planning(self._date)
-        action_expert = np.array([planned_actions[0], self.expert.price_predictions_interval.value[0]])
-        action = action_expert + action_dqn
-        return self._battery.is_safe(action[0])
+        action = power + planned_actions
+        return self._battery.is_safe(action)
