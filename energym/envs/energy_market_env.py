@@ -106,7 +106,11 @@ class EnergyMarketEnv(gym.Env):
         ref_price = self._cost.value[0]
 
         # solve the problem
-        self._opt_problem.solve(verbose=False)
+        try:
+            self._opt_problem.solve(verbose=False)
+        except cvx.error.SolverError:
+            print("ERROR Caught: cvxpy.error.SolverError")
+            pass
         if self._print_optimality or "optimal" not in self._opt_problem.status:
             raise OptimizationException
 
