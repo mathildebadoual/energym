@@ -97,7 +97,7 @@ class EnergyMarketEnv(gym.Env):
         # assign values to the cvxpy parameters
         try:
             self._p_min.value, self._p_max.value, self._cost.value = self.get_bids_actors(action, self._date)
-            self._demand.value = self.get_demand(self._date) + action[0]
+            self._demand.value = self.get_demand(self._date) + min(action[0], 0)
         except EmptyDataException:
             done = True
             ob = self._get_obs()
