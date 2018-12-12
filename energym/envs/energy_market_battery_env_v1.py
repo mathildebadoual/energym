@@ -76,7 +76,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         self._state = np.concatenate((ob_market, ob_battery))
         if reward_battery == 0 and not done:
             reward += min(power_cleared, 0) * info_market['price_cleared']
-            reward += max(power_cleared, 0) * cost
+            reward += max(power_cleared, 0) * (cost + self.expert.price_predictions_interval.value[0]) 
         ob = self._get_obs()
 
         return ob, reward, done, dict({
