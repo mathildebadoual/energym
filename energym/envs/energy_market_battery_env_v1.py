@@ -29,7 +29,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         # gym variables
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf,
                                             shape=(self._battery.observation_space.shape[0] +
-                                                   self._energy_market.observation_space.shape[0] + 1,),
+                                                   self._energy_market.observation_space.shape[0],),
                                             dtype=np.float32)
         self.action_space = spaces.Discrete(self._n_discrete_actions)
 
@@ -73,7 +73,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         ob_battery, reward_battery, _, _ = self._battery.step(power_cleared)
 
         # define state and reward
-        self._state = np.concatenate((ob_market, ob_battery, np.array([planned_actions[1]])))
+        self._state = np.concatenate((ob_market, ob_battery))
         if reward_battery == 0 and not done:
             reward += min(power_cleared, 0) * info_market['price_cleared']
             reward += max(power_cleared, 0) * cost
@@ -93,7 +93,7 @@ class EnergyMarketBatteryEnv(gym.Env):
             self._date = self._start_date
         ob_market = self._energy_market.reset(self._date)
         ob_battery = self._battery.reset()
-        self._state = np.concatenate((ob_market, ob_battery, np.array([0])))
+        self._state = np.concatenate((ob_market, ob_battery))
         return self._get_obs()
 
     def render(self, mode='rgb_array'):
