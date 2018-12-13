@@ -42,7 +42,8 @@ class EnergyMarketBatteryEnv(gym.Env):
         power, cost = self.discrete_to_continuous_action(action_dqn)
         action_dqn = np.array([power, cost])
 
-        planned_actions = self.expert.planning(self._date)
+        initial_soc = self._battery._state[0]
+        planned_actions = self.expert.planning(self._date, initial_soc)
         action_expert = np.array([planned_actions[0], self.expert.price_predictions_interval.value[0]])
 
         action = action_expert + action_dqn

@@ -37,7 +37,7 @@ class EnergyMarketEnv(gym.Env):
         self._delta_time = datetime.timedelta(hours=1)
 
         # gym variables
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
         # TODO(Mathilde): Add an option for a discrete action space
         self.action_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 
@@ -125,9 +125,9 @@ class EnergyMarketEnv(gym.Env):
 
         # the state here is the price and capacity cleared
         if action[0] > 0:
-            self._state = np.array([self._p.value[-1]])
+            self._state = np.array([self._p.value[-1], self._date.hour])
         else:
-            self._state = np.array([action[0]])
+            self._state = np.array([action[0], self._date.hour])
 
         ob = self._get_obs()
 
@@ -139,7 +139,7 @@ class EnergyMarketEnv(gym.Env):
         if start_date is not None:
             self._start_date = start_date
         self._date = self._start_date
-        self._state = np.zeros(self.observation_space.shape[0])
+        self._state = np.array([0, self._date.hour])
         return self._get_obs()
 
     def render(self, mode='rgb_array'):

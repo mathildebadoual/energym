@@ -62,15 +62,14 @@ class EnergyMarketBatteryEnv(gym.Env):
 
         self._date += self._delta_time
 
-        if -5 < power_cleared < 5:
+        if -2 < power_cleared < 2 and power != 0:
             power_cleared = 0
-            reward = - 100
+            reward += -50
 
         ob_battery, reward_battery, _, _ = self._battery.step(power_cleared)
 
         # define state and reward
         self._state = np.concatenate((ob_market, ob_battery, np.array(info_market['ref_price']).reshape((1,))))
-        reward += reward_battery
         if reward_battery >= 0 and not done:
             if power_cleared >= 0:
                 reward += power_cleared * cost
