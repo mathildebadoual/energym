@@ -12,10 +12,10 @@ class BatteryEnv(gym.Env):
 
     def __init__(self):
         # limitation parameters
-        self._max_soe = 3000  # soe = state of energy in MWh
+        self._max_soe = 300  # soe = state of energy in MWh
         self._min_soe = 0
-        self._max_power = 1000  # power to charge or discharge in MW
-        self._min_power = -1000
+        self._max_power = 100  # power to charge or discharge in MW
+        self._min_power = - 100
         self._efficiency_ratio = 0.99
 
         # cost when close to limits
@@ -38,7 +38,7 @@ class BatteryEnv(gym.Env):
 
         reward = self.get_penalty(action)
 
-        energy_to_add =  - self._efficiency_ratio * action
+        energy_to_add = - self._efficiency_ratio * action
         next_soe = self._state + energy_to_add
 
         if self.action_space.contains(abs(energy_to_add)) and self.observation_space.contains(next_soe):
@@ -90,7 +90,7 @@ class BatteryEnv(gym.Env):
     def is_safe(self, power):
         if not isinstance(power, np.ndarray):
             power = np.array([power])
-        energy_to_add =  - self._efficiency_ratio * power
+        energy_to_add = - self._efficiency_ratio * power
         next_soe = self._state + energy_to_add
         if self.action_space.contains(abs(energy_to_add)) and self.observation_space.contains(next_soe):
             return True

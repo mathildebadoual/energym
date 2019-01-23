@@ -18,9 +18,8 @@ class OptimizationException(Exception):
         super().__init__()
 
 
-# The difference between DQN and this expert agent is that it depends on the environment directly
-
 logging.getLogger().setLevel(logging.INFO)
+
 
 class ExpertAgent(object):
     def __init__(self):
@@ -68,6 +67,8 @@ class ExpertAgent(object):
     def load_price_predictions(self):
         logging.info('---- Load Prediction Prices ----')
         price_prediction_df = pd.read_csv(self.price_prediction_file_path)
+        mean_price = price_prediction_df.mean()
+        covariance_matrix = price_prediction_df.cov()
         return price_prediction_df
 
     def create_optimization_problem(self):

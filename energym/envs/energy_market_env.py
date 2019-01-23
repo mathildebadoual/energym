@@ -186,6 +186,12 @@ class EnergyMarketEnv(gym.Env):
         return p_min, p_max, cost
 
     def caiso_get_generation(self, start_at, end_at):
+        """
+        Gives the dataframe of the caiso generation data for the period between start_date and end_date
+        :param start_at: (datetime) start date
+        :param end_at: (datetime) end_date
+        :return: (dataframe) gen_df for the required period
+        """
         if start_at.tzinfo is None or start_at.tzinfo.utcoffset(start_at) is None:
             start_date_aware = self._timezone.localize(start_at)
         else:
@@ -198,6 +204,12 @@ class EnergyMarketEnv(gym.Env):
                            (end_date_aware > self._gen_df["timestamp"])]
 
     def caiso_get_load(self, start_at, end_at):
+        """
+        Gives the dataframe of the caiso load data for the period between start_date and end_date
+        :param start_at: (datetime) start date
+        :param end_at: (datetime) end_date
+        :return: (dataframe) load_df for the required period
+        """
         if start_at.tzinfo is None or start_at.tzinfo.utcoffset(start_at) is None:
             start_date_aware = self._timezone.localize(start_at)
         else:

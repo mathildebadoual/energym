@@ -9,7 +9,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 # TODO(Mathilde): Explain well what is this environment...
-
+"""
+This environment is like the energy_market_battery_env_v0 a combination of the energy market + the battery.
+The difference is that the action is added to the action of a controller. 
+"""
 
 class EnergyMarketBatteryEnv(gym.Env):
     def __init__(self):
@@ -18,7 +21,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         self._battery = gym.make('battery-v0')
         self._start_date = self._energy_market.get_start_date()
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
-        self._delta_time = delta_time=datetime.timedelta(hours=1)
+        self._delta_time = datetime.timedelta(hours=1)
         self._date = datetime.timedelta(hours=1)
         self._n_discrete_cost = 80
         self._n_discrete_power = 2000
@@ -38,8 +41,11 @@ class EnergyMarketBatteryEnv(gym.Env):
     def get_start_date(self):
         return self._start_date
 
-    def step(self, action_dqn):
-        power, cost = self.discrete_to_continuous_action(action_dqn)
+    def step(self, action_dqn=None):
+        if action_dqn is not None:
+            power, cost = self.discrete_to_continuous_action(action_dqn)
+        else:
+            power, cost = 0, 0
         action_dqn = np.array([power, cost])
 
         initial_soc = self._battery._state[0]
