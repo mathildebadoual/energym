@@ -32,4 +32,5 @@ For more information please visit the [Wiki](https://github.com/mathildebadoual/
 
 # Contact 
 Mathilde Badoual: mathilde.badoual@berkeley.edu
+
 Saehong Park: sspark@berkeley.edu
