@@ -8,3 +8,4 @@ pandas
 datetime
 gym
 matplotlib
+control

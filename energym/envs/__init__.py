@@ -1,4 +1,6 @@
-from energym.envs.energy_market_env import EnergyMarketEnv
-from energym.envs.battery_env import BatteryEnv
-from energym.envs.energy_market_battery_env_v0 import EnergyMarketBatteryEnv as EnergyMarketBatteryEnvV0
-from energym.envs.energy_market_battery_env_v1 import EnergyMarketBatteryEnv as EnergyMarketBatteryEnvV1
+from energym.envs.grid_scale.energy_market_env import EnergyMarketEnv
+from energym.envs.grid_scale.battery_env import BatteryEnv
+from energym.envs.grid_scale.energy_market_battery_env_v0 import EnergyMarketBatteryEnv as EnergyMarketBatteryEnvV0
+from energym.envs.grid_scale.energy_market_battery_env_v1 import EnergyMarketBatteryEnv as EnergyMarketBatteryEnvV1
+
+from energym.envs.battery_cells.spm_environment36 import SPM

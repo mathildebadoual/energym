@@ -19,3 +19,8 @@ register(
         id='energy_market_battery-v1',
         entry_point='energym.envs:EnergyMarketBatteryEnvV1',
 )
+
+register(
+        id='spm_environment36',
+        entry_point='energym.envs:SPM',
+)
