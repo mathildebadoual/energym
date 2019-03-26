@@ -1,12 +1,10 @@
 codecov
 coverage
-cython
-gym
-matplotlib
 cvxpy
 nose
 numpy >= 1.14
 scipy
 pandas
 datetime
-pytz
+gym
+matplotlib
