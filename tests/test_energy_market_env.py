@@ -4,7 +4,7 @@ import gym
 import energym
 import datetime
 from contextlib import contextmanager
-from energym.envs.utils import OptimizationException
+from energym.envs.grid_scale.utils import OptimizationException
 
 
 class TestEnergyMarketEnv(unittest.TestCase):

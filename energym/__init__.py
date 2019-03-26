@@ -21,6 +21,6 @@ register(
 )
 
 register(
-        id='spm_environment36',
+        id='spm_environment-v0',
         entry_point='energym.envs:SPM',
 )

@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 from gym import error, spaces, utils
 from gym.utils import seeding
-from energym.envs.utils import OptimizationException, EmptyDataException
+from energym.envs.grid_scale.utils import OptimizationException, EmptyDataException
 
 import logging
 logger = logging.getLogger(__name__)

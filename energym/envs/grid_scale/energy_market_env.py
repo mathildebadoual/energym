@@ -1,7 +1,7 @@
 import gym
 from gym import spaces
 from gym.utils import seeding
-from energym.envs.utils import OptimizationException, EmptyDataException
+from energym.envs.grid_scale.utils import OptimizationException, EmptyDataException
 
 import pandas as pd
 import cvxpy as cvx

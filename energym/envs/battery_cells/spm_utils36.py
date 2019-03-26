@@ -9,7 +9,7 @@ Created on Fri Jun  1 16:30:29 2018
 import numpy as np
 import scipy.io as sio
 from scipy.interpolate import CubicSpline #import interp1d
-from spm.envs.ParamFile_LGC import *
+from energym.envs.battery_cells.paramfile import *
 
 def spm_plant_obs_mats(p):
 
