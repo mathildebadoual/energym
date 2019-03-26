@@ -19,10 +19,8 @@ class EnergyMarketBatteryEnv(gym.Env):
         # TODO(Mathilde): If different modes, should take only continous envs + delta_time and start_date not defined here ...
         self._energy_market = gym.make('energy_market-v0')
         self._battery = gym.make('battery-v0')
-        self._start_date = self._energy_market.get_start_date()
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
         self._delta_time = datetime.timedelta(hours=1)
-        self._date = datetime.timedelta(hours=1)
         self._n_discrete_cost = 80
         self._n_discrete_power = 2000
         self._n_discrete_actions = self._n_discrete_power * self._n_discrete_cost
@@ -39,9 +37,9 @@ class EnergyMarketBatteryEnv(gym.Env):
         self.expert = ExpertAgent()
 
     def get_start_date(self):
-        return self._start_date
+        return self._energy_market.get_start_date()
 
-    def step(self, action_dqn=None):
+    def step(self, action_dqn):
         if action_dqn is not None:
             power, cost = self.discrete_to_continuous_action(action_dqn)
         else:
@@ -49,13 +47,16 @@ class EnergyMarketBatteryEnv(gym.Env):
         action_dqn = np.array([power, cost])
 
         initial_soc = self._battery._state[0]
-        planned_actions = self.expert.planning(self._date, initial_soc)
+        date = self._energy_market._date
+        planned_actions = self.expert.planning(date, initial_soc)
+        print(planned_actions)
+        print(date)
         action_expert = np.array([planned_actions[0], self.expert.price_predictions_interval.value[0]])
+        print(action_expert)
 
         action = action_expert + action_dqn
             
         done = False
-        reward = 0
 
         # first put the penalty (shielding)
         reward = self._battery.get_penalty(action[0])
@@ -66,12 +67,9 @@ class EnergyMarketBatteryEnv(gym.Env):
             self._state = np.zeros(self.observation_space.shape[0])
             ob = self._get_obs()
             print('optimization exception')
-            self._date += self._delta_time
             return ob, reward, done, dict()
 
         power_cleared = ob_market[0]
-
-        self._date += self._delta_time
 
         if -2 < power_cleared < 2 and action[0] != 0:
             power_cleared = 0
@@ -86,19 +84,23 @@ class EnergyMarketBatteryEnv(gym.Env):
             reward += max(power_cleared, 0) * (cost + self.expert.price_predictions_interval.value[0]) 
         ob = self._get_obs()
 
+        date = self._energy_market._date
+
         return ob, reward, done, dict({
-            'date': self._date, 
+            'date': date,
             'price_cleared': info_market['price_cleared'], 
             'ref_price': info_market['ref_price'], 
-            'action_tot': action
+            'action_expert': action_expert,
+            'action_dqn': action_dqn,
+            'action_tot': action,
+            'price_bid': cost,
             })
 
+    def set_test(self):
+        self._energy_market.set_test()
+
     def reset(self, start_date=None):
-        if start_date is not None:
-            self._date = start_date
-        else:
-            self._date = self._start_date
-        ob_market = self._energy_market.reset(self._date)
+        ob_market = self._energy_market.reset(start_date=start_date)
         ob_battery = self._battery.reset()
         self._state = np.concatenate((ob_market, ob_battery))
         return self._get_obs()
@@ -126,7 +128,7 @@ class EnergyMarketBatteryEnv(gym.Env):
 
     @property
     def date(self):
-        return self._date
+        return self.date
 
     def discrete_to_continuous_action(self, discrete_action):
         """

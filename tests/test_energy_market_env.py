@@ -6,6 +6,7 @@ import datetime
 from contextlib import contextmanager
 from energym.envs.utils import OptimizationException
 
+
 class TestEnergyMarketEnv(unittest.TestCase):
     def setUp(self):
         self.env = gym.make('energy_market-v0')

@@ -16,10 +16,7 @@ class EnergyMarketBatteryEnv(gym.Env):
         # TODO(Mathilde): If different modes, should take only continous envs + delta_time and start_date not defined here ...
         self._energy_market = gym.make('energy_market-v0')
         self._battery = gym.make('battery-v0')
-        self._start_date = self._energy_market.get_start_date()
         self._state = np.array([0, 0, 0, 0, 0], dtype=np.float32)
-        self._delta_time = delta_time=datetime.timedelta(hours=1)
-        self._date = datetime.timedelta(hours=1)
         self._n_discrete_cost = 200
         self._n_discrete_power = 200
         self._n_discrete_actions = self._n_discrete_power * self._n_discrete_cost
@@ -29,12 +26,9 @@ class EnergyMarketBatteryEnv(gym.Env):
         # gym variables
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf,
                                             shape=(self._battery.observation_space.shape[0] +
-                                                   self._energy_market.observation_space.shape[0] + 1,),
+                                                   self._energy_market.observation_space.shape[0],),
                                             dtype=np.float32)
         self.action_space = spaces.Discrete(self._n_discrete_actions)
-
-    def get_start_date(self):
-        return self._start_date
 
     def step(self, action):
         if isinstance(action, int) or isinstance(action, np.int64):
@@ -44,7 +38,6 @@ class EnergyMarketBatteryEnv(gym.Env):
             power, cost = action[0], action[1]
             
         done = False
-        reward = 0
 
         # first put the penalty (shielding)
         reward = self._battery.get_penalty(np.array([power]))
@@ -55,12 +48,11 @@ class EnergyMarketBatteryEnv(gym.Env):
             self._state = np.zeros(self.observation_space.shape[0])
             ob = self._get_obs()
             print('optimization exception')
-            self._date += self._delta_time
             return ob, reward, done, dict()
 
         power_cleared = ob_market[0]
 
-        self._date += self._delta_time
+        date = self._energy_market._date
 
         if -2 < power_cleared < 2 and power != 0:
             power_cleared = 0
@@ -69,26 +61,25 @@ class EnergyMarketBatteryEnv(gym.Env):
         ob_battery, reward_battery, _, _ = self._battery.step(power_cleared)
 
         # define state and reward
-        self._state = np.concatenate((ob_market, ob_battery, np.array(info_market['ref_price']).reshape((1,))))
+        self._state = np.concatenate((ob_market, ob_battery))
         if reward_battery == 0 and not done:
             reward += min(power_cleared, 0) * info_market['price_cleared']
             reward += max(power_cleared, 0) * cost
         ob = self._get_obs()
 
-        return ob, reward, done, dict({'date': self._date, 'price_cleared': info_market['price_cleared'], 'ref_price': info_market['ref_price']})
+        return ob, reward, done, dict({'date': date, 'price_cleared': info_market['price_cleared'], 'ref_price': info_market['ref_price'], 'price_bid': cost})
 
     def reset(self, start_date=None):
-        if start_date is not None:
-            self._date = start_date
-        else:
-            self._date = self._start_date
-        ob_market = self._energy_market.reset(self._date)
+        ob_market = self._energy_market.reset(start_date=start_date)
         ob_battery = self._battery.reset()
-        self._state = np.concatenate((ob_market, ob_battery, np.array([0]).reshape((1,))))
+        self._state = np.concatenate((ob_market, ob_battery))
         return self._get_obs()
 
+    def set_test(self):
+        self._energy_market.set_test()
+
     def render(self, mode='rgb_array'):
-        print('current state:', self._state)
+        print('Current state:', self._state)
 
     def _get_obs(self):
         # to assure we are not overwriting on the state

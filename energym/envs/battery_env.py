@@ -12,25 +12,22 @@ class BatteryEnv(gym.Env):
 
     def __init__(self):
         # limitation parameters
-        self._max_soe = 300  # soe = state of energy in MWh
+        self._max_soe = 3000  # soe = state of energy in MWh
         self._min_soe = 0
-        self._max_power = 100  # power to charge or discharge in MW
-        self._min_power = - 100
+        self._max_power = 1000  # power to charge or discharge in MW
+        self._min_power = - 1000
         self._efficiency_ratio = 0.99
 
         # cost when close to limits
-        self._cost_lim_power = 0.1
-        self._cost_lim_soe = 0.1
+        self._cost_lim_power = 10
+        self._cost_lim_soe = 10
 
         # gym variables
         self.observation_space = spaces.Box(low=self._min_soe, high=self._max_soe, shape=(1,), dtype=np.float32)
         # TODO(Mathilde): Add option for a discrete action space (for now it is continuous)
         self.action_space = spaces.Box(low=self._min_power, high=self._max_power, shape=(1,), dtype=np.float32)
 
-        # The state is the soc
-        self._state = np.array([0])
-
-        self.reset()
+        self._state = self.reset()
 
     def step(self, action):
         if not isinstance(action, np.ndarray):

@@ -86,7 +86,7 @@ class ExpertAgent(object):
             constraints += [self.soe[i+1] == self.soe[i] - self.battery_efficiency * self.planned_power[i]]
 
         constraints += [self.soe <= self.max_soe] + [self.min_soe <= self.soe]
-        constraints += [self.planned_power <= self.max_power] + [self.min_power  <=  self.planned_power]
+        constraints += [self.planned_power <= self.max_power] + [self.min_power <= self.planned_power]
 
         return cvx.Problem(opt, constraints)
 
