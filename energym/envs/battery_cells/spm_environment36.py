@@ -4,7 +4,7 @@ from gym.envs.toy_text import discrete
 import numpy as np
 from energym.envs.battery_cells.spm_utils36 import *
 from control.matlab import *
-from energym.envs.battery_cells.paramfile import *
+from energym.envs.battery_cells.paramfile_nca18650 import *
 
 # ==============================================================================
 # SPM
