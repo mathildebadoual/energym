@@ -246,71 +246,71 @@ def refPotentialAnode_casadi(theta):
        0.426343693564050,
        3.190867502582611])
      
-    Uref=c_n[0]*np.exp(-((theta - c_n[1])**2/c_n[2]**2))+...
-        c_n[3]*np.exp(-((theta - c_n[4])**2/c_n[5]**2))+...
-        c_n[6]*np.exp(-((theta - c_n[7])**2/c_n[8]**2))+...
-        c_n[9]*np.exp(-((theta - c_n[10])**2/c_n[11]**2))+...
-        c_n[12]*np.exp(-((theta - c_n[13])**2/c_n[14]**2))+...
-        c_n[15]*np.exp(-((theta - c_n[16])**2/c_n[17]**2))+...
-        c_n[18]*np.exp(-((theta - c_n[19])**2/c_n[20]**2))+...
-        c_n[21]*np.exp(-((theta - c_n[22])**2/c_n[23]**2))+...
-        c_n[24]*np.exp(-((theta - c_n[25])**2/c_n[26]**2))+...
-        c_n[27]*np.exp(-((theta - c_n[28])**2/c_n[29]**2))+...
-        c_n[30]*np.exp(-((theta - c_n[31])**2/c_n[32]**2))+...
-        c_n[33]*np.exp(-((theta - c_n[34])**2/c_n[35]**2))+...
-        c_n[36]*np.exp(-((theta - c_n[37])**2/c_n[38]**2))+...
-        c_n[39]*np.exp(-((theta - c_n[40])**2/c_n[41]**2))+...
-        c_n[42]*np.exp(-((theta - c_n[43])**2/c_n[44]**2))+...
-        c_n[45]*np.exp(-((theta - c_n[46])**2/c_n[47]**2))+...
-        c_n[48]*np.exp(-((theta - c_n[49])**2/c_n[50]**2))+...
-        c_n[51]*np.exp(-((theta - c_n[52])**2/c_n[53]**2))+...
-        c_n[54]*np.exp(-((theta - c_n[55])**2/c_n[56]**2))+...
-        c_n[57]*np.exp(-((theta - c_n[58])**2/c_n[59]**2))+...
-        c_n[60]*np.exp(-((theta - c_n[61])**2/c_n[62]**2))+...
-        c_n[63]*np.exp(-((theta - c_n[64])**2/c_n[65]**2))+...
-        c_n[66]*np.exp(-((theta - c_n[67])**2/c_n[68]**2))+...
-        c_n[69]*np.exp(-((theta - c_n[70])**2/c_n[71]**2))+...
-        c_n[72]*np.exp(-((theta - c_n[73])**2/c_n[74]**2))+...
-        c_n[75]*np.exp(-((theta - c_n[76])**2/c_n[77]**2))+...
-        c_n[78]*np.exp(-((theta - c_n[79])**2/c_n[80]**2))+...
-        c_n[81]*np.exp(-((theta - c_n[82])**2/c_n[83]**2))+...
-        c_n[84]*np.exp(-((theta - c_n[85])**2/c_n[86]**2))+...
-        c_n[85]*np.exp(-((theta - c_n[88])**2/c_n[89]**2))+...
-        c_n[90]*np.exp(-((theta - c_n[91])**2/c_n[92]**2))+...
-        c_n[93]*np.exp(-((theta - c_n[94])**2/c_n[95]**2))+...
-        c_n[96]*np.exp(-((theta - c_n[97])**2/c_n[98]**2))+...
-        c_n[99]*exp(-((theta - c_n[100])**2/c_n[101]**2))
+    Uref=c_n[0]*np.exp(-((theta - c_n[1])**2/c_n[2]**2))+ \
+         c_n[3]*np.exp(-((theta - c_n[4])**2/c_n[5]**2))+ \
+         c_n[6]*np.exp(-((theta - c_n[7])**2/c_n[8]**2))+ \
+         c_n[9]*np.exp(-((theta - c_n[10])**2/c_n[11]**2))+ \
+         c_n[12]*np.exp(-((theta - c_n[13])**2/c_n[14]**2))+ \
+         c_n[15]*np.exp(-((theta - c_n[16])**2/c_n[17]**2))+ \
+         c_n[18]*np.exp(-((theta - c_n[19])**2/c_n[20]**2))+ \
+         c_n[21]*np.exp(-((theta - c_n[22])**2/c_n[23]**2))+ \
+         c_n[24]*np.exp(-((theta - c_n[25])**2/c_n[26]**2))+ \
+         c_n[27]*np.exp(-((theta - c_n[28])**2/c_n[29]**2))+ \
+         c_n[30]*np.exp(-((theta - c_n[31])**2/c_n[32]**2))+ \
+         c_n[33]*np.exp(-((theta - c_n[34])**2/c_n[35]**2))+ \
+         c_n[36]*np.exp(-((theta - c_n[37])**2/c_n[38]**2))+ \
+         c_n[39]*np.exp(-((theta - c_n[40])**2/c_n[41]**2))+ \
+         c_n[42]*np.exp(-((theta - c_n[43])**2/c_n[44]**2))+ \
+         c_n[45]*np.exp(-((theta - c_n[46])**2/c_n[47]**2))+ \
+         c_n[48]*np.exp(-((theta - c_n[49])**2/c_n[50]**2))+ \
+         c_n[51]*np.exp(-((theta - c_n[52])**2/c_n[53]**2))+ \
+         c_n[54]*np.exp(-((theta - c_n[55])**2/c_n[56]**2))+ \
+         c_n[57]*np.exp(-((theta - c_n[58])**2/c_n[59]**2))+ \
+         c_n[60]*np.exp(-((theta - c_n[61])**2/c_n[62]**2))+ \
+         c_n[63]*np.exp(-((theta - c_n[64])**2/c_n[65]**2))+ \
+         c_n[66]*np.exp(-((theta - c_n[67])**2/c_n[68]**2))+ \
+         c_n[69]*np.exp(-((theta - c_n[70])**2/c_n[71]**2))+ \
+         c_n[72]*np.exp(-((theta - c_n[73])**2/c_n[74]**2))+ \
+         c_n[75]*np.exp(-((theta - c_n[76])**2/c_n[77]**2))+ \
+         c_n[78]*np.exp(-((theta - c_n[79])**2/c_n[80]**2))+ \
+         c_n[81]*np.exp(-((theta - c_n[82])**2/c_n[83]**2))+ \
+         c_n[84]*np.exp(-((theta - c_n[85])**2/c_n[86]**2))+ \
+         c_n[85]*np.exp(-((theta - c_n[88])**2/c_n[89]**2))+ \
+         c_n[90]*np.exp(-((theta - c_n[91])**2/c_n[92]**2))+ \
+         c_n[93]*np.exp(-((theta - c_n[94])**2/c_n[95]**2))+ \
+         c_n[96]*np.exp(-((theta - c_n[97])**2/c_n[98]**2))+ \
+         c_n[99]*np.exp(-((theta - c_n[100])**2/c_n[101]**2))
 
     return Uref
 
 def refPotentialCathode_casadi(theta):
 
 
-    c_p=np.array([ -40.045585568588542,
-     -62.042811084183654,
-      52.447046217508564,
-     -11.281882678497276,
-      63.276043910291172,
-      21.159687366489823,
-      37.390508845897301,
-      22.261671639629835,
-       8.574181451931103,
-      10.133001156239731,
-      -3.313604725236584,
-       1.977856101799057,
-      -3.046181118828750,
-      -0.087883198680019,
-      -0.836818408057937,
-      -0.072435003409969,
-      -0.069320106210594,
-       4.456159792325947])
+    c_p=np.array([ -40.045585568588542, \
+                   -62.042811084183654, \
+                    52.447046217508564, \
+                   -11.281882678497276, \
+                    63.276043910291172, \
+                    21.159687366489823, \
+                    37.390508845897301, \
+                    22.261671639629835, \
+                     8.574181451931103, \
+                    10.133001156239731, \
+                    -3.313604725236584, \
+                     1.977856101799057, \
+                    -3.046181118828750, \
+                    -0.087883198680019, \
+                    -0.836818408057937, \
+                    -0.072435003409969, \
+                    -0.069320106210594, \
+                     4.456159792325947])
 
     w= c_p[-1]
 
-    Uref=c_p[0] + c_p[1]*np.cos(theta*w) + c_p[2]*np.sin(theta*w) + ...
-      c_p[3]*np.cos(2*theta*w) + c_p[4]*np.sin(2*theta*w) + c_p[5]*np.cos(3*theta*w) + c_p[6]*np.sin(3*theta*w) + ...
-      c_p[7]*np.cos(4*theta*w) + c_p[8]*np.sin(4*theta*w) + c_p[9]*np.cos(5*theta*w) + c_p[10]*np.sin(5*theta*w) + ...
-      c_p[11]*np.cos(6*theta*w) + c_p[12]*np.sin(6*theta*w) + c_p[13]*np.cos(7*theta*w) + c_p[14]*np.sin(7*theta*w) + ...
+    Uref=c_p[0] + c_p[1]*np.cos(theta*w) + c_p[2]*np.sin(theta*w) + \
+      c_p[3]*np.cos(2*theta*w) + c_p[4]*np.sin(2*theta*w) + c_p[5]*np.cos(3*theta*w) + c_p[6]*np.sin(3*theta*w) +  \
+      c_p[7]*np.cos(4*theta*w) + c_p[8]*np.sin(4*theta*w) + c_p[9]*np.cos(5*theta*w) + c_p[10]*np.sin(5*theta*w) +  \
+      c_p[11]*np.cos(6*theta*w) + c_p[12]*np.sin(6*theta*w) + c_p[13]*np.cos(7*theta*w) + c_p[14]*np.sin(7*theta*w) + \
       c_p[15]*np.cos(8*theta*w) + c_p[16]*np.sin(8*theta*w)
 
 
